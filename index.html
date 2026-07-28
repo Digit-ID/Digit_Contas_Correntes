@@ -75,17 +75,27 @@
     </div>
     <div class="row" style="margin-top:12px;justify-content:space-between">
       <div class="row">
-        <label class="fld">Tolerância
+        <label class="fld" title="Diferença máxima que a app aceita para considerar que um grupo 'soma zero'. Útil para pequenos descuadres por arredondamento ou cêntimos.">Tolerância (diferença aceite)
           <select id="tol">
+            <option value="0">Exato (0,00 €)</option>
             <option value="1" selected>± 0,01 €</option>
-            <option value="0">Exato (0,00)</option>
+            <option value="2">± 0,02 €</option>
             <option value="5">± 0,05 €</option>
             <option value="10">± 0,10 €</option>
+            <option value="20">± 0,20 €</option>
+            <option value="50">± 0,50 €</option>
+            <option value="100">± 1,00 €</option>
+            <option value="200">± 2,00 €</option>
+            <option value="300">± 3,00 €</option>
+            <option value="500">± 5,00 €</option>
           </select>
         </label>
-        <label class="fld">Máx. linhas por grupo
+        <label class="fld" title="Quantas linhas (faturas, pagamentos, notas de crédito) a app pode somar em conjunto para dar zero. Ex.: 1 fatura paga com 3 pagamentos = 4 linhas.">Máx. de linhas combinadas por conciliação
           <select id="maxg">
-            <option>3</option><option>4</option><option selected>5</option><option>6</option><option>7</option>
+            <option>2</option><option>3</option><option>4</option><option selected>5</option>
+            <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+            <option>11</option><option>12</option><option>13</option><option>14</option><option>15</option>
+            <option>16</option><option>17</option><option>18</option><option>19</option><option>20</option>
           </select>
         </label>
       </div>
@@ -240,17 +250,34 @@ function conciliar(filas, cfg){
   let saldo=0; for(const f of filas){ if(f.valor && !asign.get(f.row).conc) saldo+=f.valor; }
   return {asign,grupos,resumen:{total,ok,no:total-ok,grupos:grupos.length,saldo}};
 }
+// Subconjunto que soma ~objetivo, com programação dinâmica (0/1 knapsack por
+// soma). Aguanta grupos grandes (até 'maxN' linhas) sem bloquear o navegador.
+// Prefere o grupo com MENOS linhas e, em empate, com datas mais próximas.
 function mejorSub(cands,objetivo,tol,maxN){
   const n=cands.length; maxN=Math.min(maxN,n);
-  for(let r=1;r<=maxN;r++){
-    let best=null,bestDist=Infinity;
-    for(const c of combos(n,r)){
-      let s=0,dist=0; for(const i of c){s+=cands[i].valor;dist+=cands[i].dist;}
-      if(Math.abs(s-objetivo)<=tol && dist<bestDist){best=c.map(i=>cands[i].row);bestDist=dist;}
+  if(n===0||maxN<1) return null;
+  const CAP=400000;                       // limite de estados (segurança)
+  let states=new Map();                   // soma(cents) -> {size,dist,rows}
+  states.set(0,{size:0,dist:0,rows:[]});
+  for(const c of cands){
+    const add=[];
+    for(const [s,st] of states){
+      if(st.size>=maxN) continue;
+      add.push([s+c.valor,{size:st.size+1,dist:st.dist+c.dist,rows:st.rows.concat(c.row)}]);
     }
-    if(best) return best;
+    for(const [ns,cand] of add){
+      const ex=states.get(ns);
+      if(!ex||cand.size<ex.size||(cand.size===ex.size&&cand.dist<ex.dist)) states.set(ns,cand);
+    }
+    if(states.size>CAP) break;            // degradação suave se for enorme
   }
-  return null;
+  let best=null;
+  for(const [s,st] of states){
+    if(st.size>=1 && st.size<=maxN && Math.abs(s-objetivo)<=tol){
+      if(!best||st.size<best.size||(st.size===best.size&&st.dist<best.dist)) best=st;
+    }
+  }
+  return best?best.rows:null;
 }
 
 // ---------------- integração com o Excel ----------------

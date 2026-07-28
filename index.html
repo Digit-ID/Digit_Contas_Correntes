@@ -5,79 +5,189 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Conciliador de Conta Corrente</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <style>
   :root{
-    --bg:#f6f7fb; --card:#ffffff; --ink:#1f2430; --muted:#6b7280;
-    --line:#e6e8ef; --accent:#3b5bdb; --accent-ink:#fff;
-    --ok-bg:#e2efda; --ok-ink:#2f6f3b; --no-bg:#fce4d6; --no-ink:#a6432b;
-    --chip:#eef1fb;
+    --brand:#1f6fe0; --brand-dark:#1553b3; --brand-soft:#eaf1fe;
+    --bg:#f3f6fc; --card:#ffffff; --ink:#1c2531; --muted:#6a7482;
+    --line:#e6eaf2;
+    --ok-bg:#e6f4ea; --ok-ink:#2f8f4e; --no-bg:#fdece4; --no-ink:#c05621;
+    --chip:#eef2fb;
+    --thbg:#eef2fa; --dropbg:#fafcff; --hoverchip:#e2e8f5;
+    --calloutA-bg:#eef5ff; --calloutA-bd:#cfe0fb;
+    --calloutB-bg:#fff7ed; --calloutB-bd:#fcd9b6;
   }
+  [data-theme="dark"]{
+    --brand:#4d8dff; --brand-dark:#2f6fe0; --brand-soft:#182848;
+    --bg:#0f1522; --card:#161e2e; --ink:#e6ebf5; --muted:#93a0b4;
+    --line:#26324a;
+    --ok-bg:#14301f; --ok-ink:#3fbf72; --no-bg:#372317; --no-ink:#e88a4e;
+    --chip:#1d2840;
+    --thbg:#1a2438; --dropbg:#121a2a; --hoverchip:#243250;
+    --calloutA-bg:#152238; --calloutA-bd:#28406b;
+    --calloutB-bg:#2d2113; --calloutB-bd:#5a4222;
+  }
+  [data-theme="dark"] .logo-img{background:#fff;border-radius:8px;padding:3px 8px}
+  [data-theme="dark"] .pill.ok{color:#08130b} [data-theme="dark"] .pill.no{color:#1d1006}
   *{box-sizing:border-box}
   body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    background:var(--bg);color:var(--ink);font-size:14px;line-height:1.45}
-  header{padding:18px 22px;background:linear-gradient(135deg,#3b5bdb,#5f78e8);color:#fff}
-  header h1{margin:0;font-size:19px;display:flex;align-items:center;gap:9px}
-  header p{margin:6px 0 0;font-size:13px;opacity:.92;max-width:760px}
-  .wrap{padding:18px 22px;max-width:1100px;margin:0 auto}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px;
-    box-shadow:0 1px 2px rgba(20,30,60,.04)}
-  .drop{border:2px dashed #c3cbe6;border-radius:12px;padding:26px;text-align:center;cursor:pointer;
-    transition:.15s;background:#fbfcff}
-  .drop.hover{border-color:var(--accent);background:#f2f5ff}
-  .drop b{color:var(--accent)}
+    background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5}
+  .topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;
+    padding:12px 24px;background:var(--card);border-bottom:1px solid var(--line);box-shadow:0 1px 3px rgba(20,40,90,.04)}
+  .brand{display:flex;flex-direction:column;line-height:1}
+  .logo{font-size:28px;font-weight:800;letter-spacing:-1.2px;
+    background:linear-gradient(90deg,#1553b3,#2f86f0);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .tag{font-size:8.5px;letter-spacing:3.2px;color:#9aa4b3;font-weight:700;margin-top:1px;padding-left:2px}
+  .logo-img{height:46px;display:block}
+  .topbar-actions{display:flex;gap:8px}
+  .wrap{padding:22px 24px 40px;max-width:1120px;margin:0 auto}
+  .hero{margin:6px 0 18px}
+  .hero h1{margin:0;font-size:22px;font-weight:800;letter-spacing:-.3px}
+  .hero p{margin:7px 0 0;font-size:13.5px;color:var(--muted);max-width:780px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;
+    box-shadow:0 2px 8px rgba(20,40,90,.05)}
+  .drop{border:2px dashed #c4d0e8;border-radius:14px;padding:30px;text-align:center;cursor:pointer;
+    transition:.15s;background:var(--dropbg)}
+  .drop:hover{border-color:var(--brand)}
+  .drop.hover{border-color:var(--brand);background:var(--brand-soft)}
+  .drop .big{font-size:30px}
+  .drop b{color:var(--brand)}
+  .drop .sub{font-size:12px;color:var(--muted);margin-top:6px}
   .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-  .btn{background:var(--accent);color:var(--accent-ink);border:none;border-radius:9px;padding:9px 15px;
-    font-size:13px;font-weight:600;cursor:pointer}
-  .btn.ghost{background:var(--chip);color:var(--accent)}
+  .btn{background:var(--brand);color:#fff;border:none;border-radius:10px;padding:10px 16px;
+    font-size:13px;font-weight:600;cursor:pointer;transition:.15s}
+  .btn:hover{background:var(--brand-dark)}
+  .btn.ghost{background:var(--card);color:var(--brand);border:1px solid var(--calloutA-bd)}
+  .btn.ghost:hover{background:var(--brand-soft)}
   .btn:disabled{opacity:.5;cursor:not-allowed}
-  select{padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:13px}
-  label.fld{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+  select{padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--card);font-size:13px;color:var(--ink)}
+  .fld{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--muted);font-weight:600}
+  .dd{position:relative}
+  .dd-btn{display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:190px;
+    padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);cursor:pointer;
+    font-size:13px;font-weight:600;color:var(--ink);transition:.15s}
+  .dd-btn:hover{border-color:#c3d3f0}
+  .dd-btn .chev{color:#8892a4;font-size:11px;transition:.15s}
+  .dd.open .dd-btn{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+  .dd.open .dd-btn .chev{transform:rotate(180deg)}
+  .dd-menu{position:absolute;top:calc(100% + 6px);left:0;min-width:100%;background:var(--card);border:1px solid var(--line);
+    border-radius:12px;box-shadow:0 14px 34px rgba(20,40,90,.16);padding:6px;z-index:30;max-height:250px;overflow:auto}
+  .dd-menu.hidden{display:none}
+  .dd-opt{padding:9px 11px;border-radius:8px;font-size:13px;cursor:pointer;display:flex;align-items:center;
+    justify-content:space-between;gap:12px;white-space:nowrap;color:var(--ink)}
+  .dd-opt:hover{background:var(--brand-soft)}
+  .dd-opt.sel{background:var(--brand);color:#fff}
+  .dd-opt.sel::after{content:"✓";font-weight:700}
+  .progress{margin-top:12px;padding:10px 14px;border-radius:10px;background:var(--brand-soft);
+    color:var(--brand);font-weight:700;font-size:13px;display:flex;align-items:center;gap:10px}
+  .progress .spin{width:14px;height:14px;border:2px solid var(--brand);border-top-color:transparent;
+    border-radius:50%;animation:sp .7s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+  .sheetbar{display:flex;gap:3px;overflow-x:auto;margin-top:10px;padding:7px 8px 4px;background:var(--thbg);
+    border:1px solid var(--line);border-radius:10px;scrollbar-width:thin}
+  .stab{display:flex;align-items:center;gap:7px;padding:7px 13px;font-size:12.5px;font-weight:600;
+    border-radius:8px;background:var(--card);color:var(--ink);cursor:pointer;white-space:nowrap;
+    border:1px solid var(--line);flex:0 0 auto}
+  .stab:hover{background:var(--brand-soft)}
+  .stab.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .stab .x{opacity:.6;font-weight:800;padding:0 2px}
+  .stab .x:hover{opacity:1}
+  .fchip{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;background:var(--chip);
+    color:var(--ink);font-size:12.5px;font-weight:600;cursor:pointer;border:1px solid var(--line)}
+  .fchip.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .fchip .x{opacity:.65;font-weight:800;padding:0 2px}
+  .fchip .x:hover{opacity:1}
+  .btn-theme{border:1px solid var(--line);background:var(--card);border-radius:10px;width:40px;height:37px;
+    font-size:16px;cursor:pointer;transition:.15s}
+  .btn-theme:hover{background:var(--chip)}
+  .ic{vertical-align:-2px;opacity:.8}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-left:6px}
+  .dot.g{background:var(--ok-ink)} .dot.o{background:var(--no-ink)}
+  .langs{display:flex;gap:4px;background:var(--chip);border-radius:10px;padding:4px}
+  .lang{border:none;background:transparent;padding:6px 11px;border-radius:8px;font-size:12.5px;
+    font-weight:700;color:var(--muted);cursor:pointer;transition:.15s}
+  .lang:hover{background:var(--hoverchip)}
+  .lang.active{background:var(--brand);color:#fff}
   .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-  .metric{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
-  .metric .k{font-size:12px;color:var(--muted)}
-  .metric .v{font-size:22px;font-weight:700;margin-top:3px}
-  .tabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
-  .tab{padding:7px 13px;border-radius:8px;background:var(--chip);color:#3a4256;cursor:pointer;font-size:13px;font-weight:600}
-  .tab.active{background:var(--accent);color:#fff}
-  .tblwrap{overflow:auto;max-height:440px;border:1px solid var(--line);border-radius:10px}
+  .metric{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .metric .k{font-size:12px;color:var(--muted);font-weight:600}
+  .metric .v{font-size:24px;font-weight:800;margin-top:4px;letter-spacing:-.5px}
+  .tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+  .tab{padding:8px 14px;border-radius:9px;background:var(--chip);color:var(--ink);cursor:pointer;font-size:13px;font-weight:600}
+  .tab.active{background:var(--brand);color:#fff}
+  .tblwrap{overflow:auto;max-height:440px;border:1px solid var(--line);border-radius:12px}
   table{border-collapse:collapse;width:100%;font-size:12.5px;white-space:nowrap}
-  th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left}
-  th{position:sticky;top:0;background:#f0f2f8;z-index:1;font-size:11.5px;text-transform:uppercase;letter-spacing:.3px;color:#556}
+  th,td{padding:8px 11px;border-bottom:1px solid var(--line);text-align:left}
+  th{position:sticky;top:0;background:var(--thbg);z-index:1;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)}
   tr.ok td{background:var(--ok-bg)}
   tr.no td{background:var(--no-bg)}
-  .pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
+  .pill{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
   .pill.ok{background:var(--ok-ink);color:#fff}
   .pill.no{background:var(--no-ink);color:#fff}
   .ref{font-weight:600}
-  .grp{padding:9px 12px;border:1px solid var(--line);border-radius:9px;margin-bottom:8px;background:#fbfcff}
-  .grp .h{font-weight:700;color:var(--accent)}
+  .grp{padding:11px 14px;border:1px solid var(--line);border-radius:11px;margin-bottom:8px;background:var(--dropbg)}
+  .grp .h{font-weight:700;color:var(--brand)}
   .muted{color:var(--muted)}
   .num{text-align:right;font-variant-numeric:tabular-nums}
   .hidden{display:none}
-  .note{font-size:12px;color:var(--muted);margin-top:8px}
-  .badge{background:#eef1fb;color:#3a4256;border-radius:6px;padding:2px 7px;font-size:11.5px;font-weight:600}
+  .note{font-size:12px;color:var(--muted);margin-top:10px}
+  .badge{background:var(--brand-soft);color:var(--brand);border-radius:7px;padding:3px 8px;font-size:11.5px;font-weight:700}
+  .overlay{position:fixed;inset:0;background:rgba(20,30,50,.5);display:flex;align-items:center;justify-content:center;padding:20px;z-index:50}
+  .overlay.hidden{display:none}
+  .modal{background:var(--card);border-radius:16px;max-width:620px;width:100%;max-height:85vh;overflow:auto;box-shadow:0 20px 60px rgba(15,30,60,.3)}
+  .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--card)}
+  .modal-head h2{margin:0;font-size:18px;font-weight:800}
+  .modal-body{padding:20px 22px}
+  .close{border:none;background:var(--chip);border-radius:9px;width:34px;height:34px;font-size:18px;cursor:pointer;color:var(--muted)}
+  .close:hover{background:var(--hoverchip)}
+  .step{display:flex;gap:12px;margin-bottom:14px}
+  .step .n{flex:0 0 26px;height:26px;border-radius:50%;background:var(--brand);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:13px}
+  .step .t{font-size:13.5px}
+  .callout{border-radius:12px;padding:12px 14px;margin:10px 0;font-size:13px;border:1px solid}
+  .callout.a{background:var(--calloutA-bg);border-color:var(--calloutA-bd)}
+  .callout.b{background:var(--calloutB-bg);border-color:var(--calloutB-bd)}
+  .callout code{background:#0f172a;color:#e2e8f0;padding:2px 7px;border-radius:6px;font-size:12.5px;font-weight:600}
+  .callout .plus{color:var(--ok-ink);font-weight:800}
+  .callout .minus{color:var(--no-ink);font-weight:800}
+  @media(max-width:640px){.metrics{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
-<header>
-  <h1>✅ Conciliador de Conta Corrente de Fornecedores</h1>
-  <p>Encontra as linhas cujo <b>DEB_CRED soma zero</b> (fatura + pagamento, faturas com vários
-     pagamentos, notas de crédito), marca-as como conciliadas e deixa visíveis as linhas
-     soltas que compõem o saldo. Tudo corre no teu navegador — nenhum ficheiro sai do teu computador.</p>
-</header>
+<div class="topbar">
+  <div class="brand"><img class="logo-img" alt="digit — beyond numbers" src="data:image/png;base64,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"></div>
+  <div class="topbar-actions">
+    <button id="btn-theme" class="btn-theme" title="Tema claro/escuro">🌙</button>
+    <div class="langs" id="langs">
+      <button class="lang active" data-lang="pt">PT</button>
+      <button class="lang" data-lang="en">EN</button>
+      <button class="lang" data-lang="es">ES</button>
+    </div>
+    <button id="btn-instr" class="btn ghost" data-i18n="btnInstr">📘 Instruções</button>
+  </div>
+</div>
 
 <div class="wrap">
+  <div class="hero">
+    <h1 data-i18n="heroTitle">Conciliador de Conta Corrente</h1>
+    <p data-i18n="heroText">Carrega o teu Excel e a app encontra as linhas cujo <b>DEB_CRED</b> soma zero
+       (fatura + pagamento, notas de crédito, um pagamento de várias faturas) e marca as que ficam soltas.
+       Tudo corre no teu navegador — nenhum ficheiro sai do teu computador.</p>
+  </div>
+
   <div class="card">
     <div id="drop" class="drop">
-      <div style="font-size:26px">📄</div>
-      <div>Arrasta aqui o teu Excel ou <b>clica para escolher</b> (.xlsx)</div>
-      <input id="file" type="file" accept=".xlsx,.xlsm" class="hidden">
+      <div class="big" style="color:var(--muted)"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+      <div data-i18n="dropMain">Arrasta ou <b>carrega o teu ficheiro</b> (Excel ou CSV)</div>
+      <div class="sub" data-i18n="dropSub">Aceita .xlsx · .xlsm · .xlsb · .xls · .csv · .ods &nbsp;|&nbsp; precisas das colunas <b>DATA_CERTA</b> e <b>DEB_CRED</b> — vê as <b>Instruções</b>.</div>
+      <input id="file" type="file" accept=".xlsx,.xlsm,.xlsb,.xls,.csv,.ods" multiple class="hidden">
     </div>
+    <div id="progress" class="progress hidden"><span class="spin"></span><span id="progress-txt"></span></div>
     <div class="row" style="margin-top:12px;justify-content:space-between">
       <div class="row">
-        <label class="fld" title="Diferença máxima que a app aceita para considerar que um grupo 'soma zero'. Útil para pequenos descuadres por arredondamento ou cêntimos.">Tolerância (diferença aceite)
+        <div class="fld" title="Diferença máxima que a app aceita para considerar que um grupo 'soma zero'. Útil para pequenos descuadres por arredondamento ou cêntimos."><span data-i18n="lblTol">Tolerância (diferença aceite)</span>
           <select id="tol">
-            <option value="0">Exato (0,00 €)</option>
+            <option value="0" data-i18n="optExact">Exato (0,00 €)</option>
             <option value="1" selected>± 0,01 €</option>
             <option value="2">± 0,02 €</option>
             <option value="5">± 0,05 €</option>
@@ -89,51 +199,187 @@
             <option value="300">± 3,00 €</option>
             <option value="500">± 5,00 €</option>
           </select>
-        </label>
-        <label class="fld" title="Quantas linhas (faturas, pagamentos, notas de crédito) a app pode somar em conjunto para dar zero. Ex.: 1 fatura paga com 3 pagamentos = 4 linhas.">Máx. de linhas combinadas por conciliação
+        </div>
+        <div class="fld" title="Quantas linhas (faturas, pagamentos, notas de crédito) a app pode somar em conjunto para dar zero. Ex.: 1 fatura paga com 3 pagamentos = 4 linhas."><span data-i18n="lblMax">Máx. de linhas combinadas por conciliação</span>
           <select id="maxg">
             <option>2</option><option>3</option><option>4</option><option selected>5</option>
             <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
             <option>11</option><option>12</option><option>13</option><option>14</option><option>15</option>
             <option>16</option><option>17</option><option>18</option><option>19</option><option>20</option>
           </select>
-        </label>
+        </div>
       </div>
-      <button id="demo" class="btn ghost">▶ Ver exemplo</button>
+      <button id="demo" class="btn ghost" data-i18n="btnDemo">▶ Ver exemplo</button>
     </div>
   </div>
 
   <div id="results" class="hidden">
     <div class="card">
+      <div id="filesum" class="muted" style="margin-bottom:10px;font-weight:600"></div>
       <div class="row" style="justify-content:space-between;margin-bottom:12px">
         <div id="detected" class="muted"></div>
-        <button id="download" class="btn">⬇️ Descarregar Excel conciliado</button>
+        <button id="download" class="btn" data-i18n="btnDownload">⬇️ Descarregar Excel conciliado</button>
       </div>
       <div class="metrics">
-        <div class="metric"><div class="k">Linhas totais</div><div class="v" id="m-total">–</div></div>
-        <div class="metric"><div class="k">Conciliadas ✅</div><div class="v" id="m-ok" style="color:var(--ok-ink)">–</div></div>
-        <div class="metric"><div class="k">Soltas ❌</div><div class="v" id="m-no" style="color:var(--no-ink)">–</div></div>
-        <div class="metric"><div class="k">Saldo em aberto</div><div class="v" id="m-saldo">–</div></div>
+        <div class="metric"><div class="k" data-i18n="mTotal">Linhas totais</div><div class="v" id="m-total">–</div></div>
+        <div class="metric"><div class="k" data-i18n="mOk">Conciliadas ✅</div><div class="v" id="m-ok" style="color:var(--ok-ink)">–</div></div>
+        <div class="metric"><div class="k" data-i18n="mNo">Soltas ❌</div><div class="v" id="m-no" style="color:var(--no-ink)">–</div></div>
+        <div class="metric"><div class="k" data-i18n="mSaldo">Saldo em aberto</div><div class="v" id="m-saldo">–</div></div>
       </div>
     </div>
 
     <div class="card">
       <div class="tabs">
-        <div class="tab active" data-t="all">📋 Tudo</div>
-        <div class="tab" data-t="loose">❌ Soltas (saldo)</div>
-        <div class="tab" data-t="groups">🔗 Grupos</div>
+        <div class="tab active" data-t="all" data-i18n="tabAll">📋 Tudo</div>
+        <div class="tab" data-t="loose" data-i18n="tabLoose">❌ Soltas (saldo)</div>
+        <div class="tab" data-t="groups" data-i18n="tabGroups">🔗 Grupos</div>
       </div>
       <div id="view-all"><div class="tblwrap"><table id="tbl"></table></div></div>
       <div id="view-loose" class="hidden"><div class="tblwrap"><table id="tbl-loose"></table></div>
-        <div class="note">Estas são as linhas que não casam com nada e compõem o saldo atual da conta.</div></div>
+        <div class="note" data-i18n="noteLoose">Estas são as linhas que não casam com nada e compõem o saldo atual da conta.</div></div>
       <div id="view-groups" class="hidden"></div>
+      <div id="sheetbar" class="sheetbar hidden"></div>
     </div>
-    <div class="note">A coluna <b>CONCILIADO</b> sai como VERDADEIRO/FALSO. No Excel podes selecioná-la e usar
+    <div class="note" data-i18n="noteBool">A coluna <b>CONCILIADO</b> sai como VERDADEIRO/FALSO. No Excel podes selecioná-la e usar
       <b>Inserir → Caixa de verificação</b> para a tornar clicável.</div>
   </div>
 </div>
 
 <script>
+// ---------------- idiomas ----------------
+const _ic=(p,s=15)=>`<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+const ICON={
+ book:_ic('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>'),
+ play:_ic('<polygon points="6 4 20 12 6 20 6 4"/>'),
+ x:_ic('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'),
+ xc:_ic('<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>'),
+ download:_ic('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>'),
+ file:_ic('<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>'),
+ list:_ic('<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>'),
+ link:_ic('<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>'),
+ moon:_ic('<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',16),
+ sun:_ic('<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>',16),
+ cal:_ic('<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>'),
+ money:_ic('<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/>'),
+ alert:_ic('<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>'),
+};
+const I18N={
+ pt:{
+  btnInstr:ICON.book+" Instruções",
+  heroTitle:"Conciliador de Conta Corrente",
+  heroText:"Carrega o teu Excel e a app encontra as linhas cujo <b>DEB_CRED</b> soma zero (fatura + pagamento, notas de crédito, um pagamento de várias faturas) e marca as que ficam soltas. Tudo corre no teu navegador — nenhum ficheiro sai do teu computador.",
+  dropMain:"Arrasta ou <b>carrega o teu ficheiro</b> (Excel ou CSV)",
+  dropSub:"Aceita .xlsx · .xlsm · .xlsb · .xls · .csv · .ods &nbsp;|&nbsp; precisas das colunas <b>DATA_CERTA</b> e <b>DEB_CRED</b> — vê as <b>Instruções</b>.",
+  lblTol:"Tolerância (diferença aceite)", lblMax:"Máx. de linhas combinadas por conciliação",
+  optExact:"Exato (0,00 €)", btnDemo:ICON.play+" Ver exemplo", btnDemoHide:ICON.x+" Ocultar exemplo", btnDownload:ICON.download+" Descarregar Excel conciliado",
+  mTotal:"Linhas totais", mOk:"Conciliadas <span class='dot g'></span>", mNo:"Soltas <span class='dot o'></span>", mSaldo:"Saldo em aberto",
+  tabAll:ICON.list+" Tudo", tabLoose:ICON.xc+" Soltas (saldo)", tabGroups:ICON.link+" Grupos",
+  noteLoose:"Estas são as linhas que não casam com nada e compõem o saldo atual da conta.",
+  noteBool:"A coluna <b>CONCILIADO</b> sai como VERDADEIRO/FALSO. No Excel podes selecioná-la e usar <b>Inserir → Caixa de verificação</b> para a tornar clicável.",
+  modalTitle:ICON.book+" Instruções",
+  step1:"<b>Carrega ou arrasta</b> o teu ficheiro para a área indicada. Formatos aceites: <b>.xlsx</b>, <b>.xlsm</b>, <b>.xlsb</b>, <b>.xls</b> (97-2003), <b>.csv</b> e <b>.ods</b>.",
+  step2:"Para funcionar, o teu Excel tem de cumprir <b>dois requisitos</b> nas colunas:",
+  calloutA:ICON.cal+" A coluna das <b>datas</b> tem de se chamar exatamente <code>DATA_CERTA</code>.<div class='muted' style='margin-top:6px'>A ordem das colunas pode ser qualquer — a app procura-a pelo nome.</div>",
+  calloutB:ICON.money+" Tem de existir <b>uma única coluna</b> chamada <code>DEB_CRED</code> com todos os valores:<div style='margin-top:8px'>• valores a <b>débito</b> com sinal <span class='plus'>positivo (+)</span> &nbsp;→&nbsp; ex.: <b>992,63</b><br>• valores a <b>crédito</b> com sinal <span class='minus'>negativo (−)</span> &nbsp;→&nbsp; ex.: <b>−992,63</b></div>",
+  step3:"A app procura as linhas cujo <b>DEB_CRED soma zero</b> e marca-as como conciliadas. As que não casam ficam <b>SEM IDENTIFICAR</b> e formam o saldo em aberto.",
+  step4:"Descarrega o <b>Excel conciliado</b>, já com as colunas <b>CONCILIADO</b> (VERDADEIRO/FALSO) e <b>INFORMAÇÃO</b> (Referência 001, 002…).",
+  step5:"Podes carregar <b>vários ficheiros de uma vez</b> — a descarga junta tudo num só Excel, com <b>uma folha por ficheiro</b>. O que conta é o <b>total de linhas</b>: até <b>~20.000 linhas</b> somadas é imediato; até <b>~50.000</b> funciona com uma espera de alguns segundos.",
+  modalOk:"Percebi",
+  detected:"Colunas detetadas — importes: {v} · data: {f} · cabeçalho na linha {r}",
+  warnBig:ICON.alert+" ficheiro muito grande: algumas conciliações complexas podem não ter sido procuradas",
+  errNoCol:"Não encontrei a coluna de importes 'DEB_CRED'. Verifica o cabeçalho do Excel (vê as Instruções).",
+  grpType1:"fatura+pagamento (1:1)", grpTypeN:"pagamento de várias faturas",
+  grpRows:"linhas Excel", grpEmpty:"Sem grupos conciliados.",
+  pillTrue:"VERDADEIRO", pillFalse:"FALSO",
+  processing:"A processar {i}/{n}",
+  filesSum:ICON.file+" {n} ficheiro(s) carregado(s) · {l} linhas no total",
+ },
+ en:{
+  btnInstr:ICON.book+" Instructions",
+  heroTitle:"Supplier Account Reconciliation",
+  heroText:"Upload your Excel and the app finds the lines whose <b>DEB_CRED</b> sums to zero (invoice + payment, credit notes, one payment settling several invoices) and flags the unmatched ones. Everything runs in your browser — no file ever leaves your computer.",
+  dropMain:"Drag or <b>upload your file</b> (Excel or CSV)",
+  dropSub:"Accepts .xlsx · .xlsm · .xlsb · .xls · .csv · .ods &nbsp;|&nbsp; you need the columns <b>DATA_CERTA</b> and <b>DEB_CRED</b> — see <b>Instructions</b>.",
+  lblTol:"Tolerance (accepted difference)", lblMax:"Max. lines combined per reconciliation",
+  optExact:"Exact (0.00 €)", btnDemo:ICON.play+" See example", btnDemoHide:ICON.x+" Hide example", btnDownload:ICON.download+" Download reconciled Excel",
+  mTotal:"Total lines", mOk:"Reconciled <span class='dot g'></span>", mNo:"Unmatched <span class='dot o'></span>", mSaldo:"Open balance",
+  tabAll:ICON.list+" All", tabLoose:ICON.xc+" Unmatched (balance)", tabGroups:ICON.link+" Groups",
+  noteLoose:"These are the lines that match nothing and make up the current account balance.",
+  noteBool:"The <b>CONCILIADO</b> column comes as TRUE/FALSE. In Excel you can select it and use <b>Insert → Checkbox</b> to make it clickable.",
+  modalTitle:ICON.book+" Instructions",
+  step1:"<b>Upload or drag</b> your file to the indicated area. Accepted formats: <b>.xlsx</b>, <b>.xlsm</b>, <b>.xlsb</b>, <b>.xls</b> (97-2003), <b>.csv</b> and <b>.ods</b>.",
+  step2:"For it to work, your Excel must meet <b>two column requirements</b>:",
+  calloutA:ICON.cal+" The <b>date</b> column must be named exactly <code>DATA_CERTA</code>.<div class='muted' style='margin-top:6px'>Column order doesn't matter — the app finds it by name.</div>",
+  calloutB:ICON.money+" There must be <b>a single column</b> named <code>DEB_CRED</code> with all the values:<div style='margin-top:8px'>• <b>debit</b> amounts with a <span class='plus'>positive (+)</span> sign &nbsp;→&nbsp; e.g. <b>992.63</b><br>• <b>credit</b> amounts with a <span class='minus'>negative (−)</span> sign &nbsp;→&nbsp; e.g. <b>−992.63</b></div>",
+  step3:"The app searches for lines whose <b>DEB_CRED sums to zero</b> and marks them as reconciled. Those that don't match stay as <b>SEM IDENTIFICAR</b> and form the open balance.",
+  step4:"Download the <b>reconciled Excel</b>, with the <b>CONCILIADO</b> (TRUE/FALSE) and <b>INFORMAÇÃO</b> (Referência 001, 002…) columns added.",
+  step5:"You can load <b>several files at once</b> — the download merges everything into a single Excel with <b>one sheet per file</b>. What matters is the <b>total number of lines</b>: up to <b>~20,000 lines</b> combined is instant; up to <b>~50,000</b> works with a few seconds' wait.",
+  modalOk:"Got it",
+  detected:"Detected columns — amounts: {v} · date: {f} · header on row {r}",
+  warnBig:ICON.alert+" very large file: some complex reconciliations may not have been searched",
+  errNoCol:"Couldn't find the amounts column 'DEB_CRED'. Check your Excel header (see Instructions).",
+  grpType1:"invoice+payment (1:1)", grpTypeN:"one payment, several invoices",
+  grpRows:"Excel rows", grpEmpty:"No reconciled groups.",
+  pillTrue:"TRUE", pillFalse:"FALSE",
+  processing:"Processing {i}/{n}",
+  filesSum:ICON.file+" {n} file(s) loaded · {l} lines in total",
+ },
+ es:{
+  btnInstr:ICON.book+" Instrucciones",
+  heroTitle:"Conciliador de Cuenta Corriente",
+  heroText:"Sube tu Excel y la app encuentra las líneas cuyo <b>DEB_CRED</b> suma cero (factura + pago, notas de crédito, un pago que salda varias facturas) y marca las que quedan sueltas. Todo corre en tu navegador — ningún fichero sale de tu ordenador.",
+  dropMain:"Arrastra o <b>sube tu fichero</b> (Excel o CSV)",
+  dropSub:"Acepta .xlsx · .xlsm · .xlsb · .xls · .csv · .ods &nbsp;|&nbsp; necesitas las columnas <b>DATA_CERTA</b> y <b>DEB_CRED</b> — ver <b>Instrucciones</b>.",
+  lblTol:"Tolerancia (diferencia aceptada)", lblMax:"Máx. de líneas combinadas por conciliación",
+  optExact:"Exacto (0,00 €)", btnDemo:ICON.play+" Ver ejemplo", btnDemoHide:ICON.x+" Ocultar ejemplo", btnDownload:ICON.download+" Descargar Excel conciliado",
+  mTotal:"Líneas totales", mOk:"Conciliadas <span class='dot g'></span>", mNo:"Sueltas <span class='dot o'></span>", mSaldo:"Saldo abierto",
+  tabAll:ICON.list+" Todo", tabLoose:ICON.xc+" Sueltas (saldo)", tabGroups:ICON.link+" Grupos",
+  noteLoose:"Estas son las líneas que no casan con nada y componen el saldo actual de la cuenta.",
+  noteBool:"La columna <b>CONCILIADO</b> sale como VERDADERO/FALSO. En Excel puedes seleccionarla y usar <b>Insertar → Casilla de verificación</b> para hacerla clicable.",
+  modalTitle:ICON.book+" Instrucciones",
+  step1:"<b>Sube o arrastra</b> tu fichero al área indicada. Formatos aceptados: <b>.xlsx</b>, <b>.xlsm</b>, <b>.xlsb</b>, <b>.xls</b> (97-2003), <b>.csv</b> y <b>.ods</b>.",
+  step2:"Para funcionar, tu Excel debe cumplir <b>dos requisitos</b> en las columnas:",
+  calloutA:ICON.cal+" La columna de <b>fechas</b> debe llamarse exactamente <code>DATA_CERTA</code>.<div class='muted' style='margin-top:6px'>El orden de las columnas da igual — la app la busca por el nombre.</div>",
+  calloutB:ICON.money+" Debe existir <b>una única columna</b> llamada <code>DEB_CRED</code> con todos los valores:<div style='margin-top:8px'>• valores a <b>débito</b> con signo <span class='plus'>positivo (+)</span> &nbsp;→&nbsp; ej.: <b>992,63</b><br>• valores a <b>crédito</b> con signo <span class='minus'>negativo (−)</span> &nbsp;→&nbsp; ej.: <b>−992,63</b></div>",
+  step3:"La app busca las líneas cuyo <b>DEB_CRED suma cero</b> y las marca como conciliadas. Las que no casan quedan como <b>SEM IDENTIFICAR</b> y forman el saldo abierto.",
+  step4:"Descarga el <b>Excel conciliado</b>, ya con las columnas <b>CONCILIADO</b> (VERDADERO/FALSO) e <b>INFORMAÇÃO</b> (Referência 001, 002…).",
+  step5:"Puedes cargar <b>varios ficheros a la vez</b> — la descarga lo junta todo en un solo Excel con <b>una hoja por fichero</b>. Lo que cuenta es el <b>total de líneas</b>: hasta <b>~20.000 líneas</b> sumadas es inmediato; hasta <b>~50.000</b> funciona con una espera de unos segundos.",
+  modalOk:"Entendido",
+  detected:"Columnas detectadas — importes: {v} · fecha: {f} · cabecera en la fila {r}",
+  warnBig:ICON.alert+" fichero muy grande: algunas conciliaciones complejas pueden no haberse buscado",
+  errNoCol:"No encontré la columna de importes 'DEB_CRED'. Revisa la cabecera de tu Excel (ver Instrucciones).",
+  grpType1:"factura+pago (1:1)", grpTypeN:"un pago, varias facturas",
+  grpRows:"filas Excel", grpEmpty:"Sin grupos conciliados.",
+  pillTrue:"VERDADERO", pillFalse:"FALSO",
+  processing:"Procesando {i}/{n}",
+  filesSum:ICON.file+" {n} fichero(s) cargado(s) · {l} líneas en total",
+ }
+};
+let LANG="pt";
+function t(k){ return (I18N[LANG] && I18N[LANG][k]) || I18N.pt[k] || k; }
+function plain(k){ return String(t(k)).replace(/<[^>]*>/g,"").trim(); }
+function applyLang(lang){
+  LANG=lang;
+  document.documentElement.lang = lang==="pt"?"pt":(lang==="en"?"en":"es");
+  document.querySelectorAll("[data-i18n]").forEach(el=>{ el.innerHTML=t(el.dataset.i18n); });
+  document.querySelectorAll("#langs .lang").forEach(b=>b.classList.toggle("active",b.dataset.lang===lang));
+  if(typeof FILES!=="undefined" && FILES.length) render();
+  // refresca el rotulo del desplegable de tolerancia (opcion "Exato")
+  document.querySelectorAll(".dd").forEach(dd=>{
+    const sel=dd.previousElementSibling && dd.previousElementSibling.tagName==="SELECT"?dd.previousElementSibling:null;
+  });
+  const tolSel=document.getElementById("tol");
+  if(tolSel){
+    const dd=tolSel.nextElementSibling;
+    if(dd && dd.classList.contains("dd")){
+      const lab=dd.querySelector(".dd-btn span");
+      const menu0=dd.querySelector(".dd-menu .dd-opt span");
+      if(menu0) menu0.textContent=tolSel.options[0].textContent;
+      if(lab && tolSel.selectedIndex===0) lab.textContent=tolSel.options[0].textContent;
+    }
+  }
+}
+
 // ---------------- utilidades ----------------
 function normHeader(v){
   if(v==null) return "";
@@ -208,39 +454,44 @@ function conciliar(filas, cfg){
   // memória quando há milhares de linhas com o mesmo valor). Só se comparam
   // linhas cujo valor absoluto coincide (dentro da tolerância).
   const dn=x=>x?x.getTime():0;
-  const posMap=new Map(), negMap=new Map();   // |valor|(cents) -> [linhas]
-  for(const f of pend.values()){
-    const k=Math.abs(f.valor);
-    const m=f.valor>0?posMap:negMap;
-    if(m.has(k)) m.get(k).push(f); else m.set(k,[f]);
-  }
-  const pares=[];
-  const PAIR_CAP=2000000; let overflow=false;
-  for(const [k,posList] of posMap){
-    for(let d=-tol; d<=tol && !overflow; d++){
-      const negList=negMap.get(k+d);
-      if(!negList) continue;
-      if(posList.length*negList.length<=4000){
-        for(const p of posList) for(const nn of negList) pares.push([dayDist(p.fecha,nn.fecha),p.row,nn.row]);
-      } else {                                 // bucket enorme -> dois ponteiros por data
-        const P=[...posList].sort((a,b)=>dn(a.fecha)-dn(b.fecha));
-        const N=[...negList].sort((a,b)=>dn(a.fecha)-dn(b.fecha));
-        for(let i=0;i<P.length&&i<N.length;i++) pares.push([dayDist(P[i].fecha,N[i].fecha),P[i].row,N[i].row]);
+  let overflow=false;
+  const fase1=(tolPass)=>{                     // corre 2x: exatos primeiro, depois aproximados
+    const posMap=new Map(), negMap=new Map();  // |valor|(cents) -> [linhas]
+    for(const f of pend.values()){
+      const k=Math.abs(f.valor);
+      const m=f.valor>0?posMap:negMap;
+      if(m.has(k)) m.get(k).push(f); else m.set(k,[f]);
+    }
+    const pares=[];
+    const PAIR_CAP=2000000;
+    for(const [k,posList] of posMap){
+      for(let d=-tolPass; d<=tolPass && !overflow; d++){
+        const negList=negMap.get(k+d);
+        if(!negList) continue;
+        if(posList.length*negList.length<=4000){
+          for(const p of posList) for(const nn of negList) pares.push([dayDist(p.fecha,nn.fecha),p.row,nn.row]);
+        } else {                               // bucket enorme -> dois ponteiros por data
+          const P=[...posList].sort((a,b)=>dn(a.fecha)-dn(b.fecha));
+          const N=[...negList].sort((a,b)=>dn(a.fecha)-dn(b.fecha));
+          for(let i=0;i<P.length&&i<N.length;i++) pares.push([dayDist(P[i].fecha,N[i].fecha),P[i].row,N[i].row]);
+        }
+        if(pares.length>PAIR_CAP) overflow=true;
       }
-      if(pares.length>PAIR_CAP) overflow=true;
+      if(overflow) break;
     }
-    if(overflow) break;
-  }
-  pares.sort((p,q)=>p[0]-q[0]||p[1]-q[1]||p[2]-q[2]);
-  for(const [d,ra,rb] of pares){
-    if(pend.has(ra)&&pend.has(rb)){
-      gid++; grupos.push({id:gid,rows:[ra,rb],tipo:"fatura+pagamento (1:1)"});
-      pend.delete(ra); pend.delete(rb);
+    pares.sort((p,q)=>p[0]-q[0]||p[1]-q[1]||p[2]-q[2]);
+    for(const [d,ra,rb] of pares){
+      if(pend.has(ra)&&pend.has(rb)){
+        gid++; grupos.push({id:gid,rows:[ra,rb],tipo:"fatura+pagamento (1:1)"});
+        pend.delete(ra); pend.delete(rb);
+      }
     }
-  }
+  };
+  fase1(0);                                    // 1º: pares EXATOS (prioridade)
+  if(tol>0) fase1(tol);                        // 2º: pares dentro da tolerância
 
   // Fase 2: subconjunto que soma zero (um pagamento salda várias faturas)
-  const budget={ops:0, max:5000000, stopped:false};   // orçamento global de trabalho
+  const budget={ops:0, max:20000000, stopped:false};   // orçamento global de trabalho
   const restantes=[...pend.keys()].sort((x,y)=>Math.abs(pend.get(y).valor)-Math.abs(pend.get(x).valor));
   for(const row of restantes){
     if(budget.ops>budget.max) break;                   // segurança: nunca bloquear
@@ -262,8 +513,16 @@ function conciliar(filas, cfg){
   const asign=new Map();
   for(const f of filas) asign.set(f.row,{conc:false,ref:"SEM IDENTIFICAR",grupo:null});
   grupos.sort((a,b)=>Math.min(...a.rows)-Math.min(...b.rows));
+  const valMap=new Map(filas.map(f=>[f.row,f.valor||0]));
   grupos.forEach((g,i)=>{
-    const ref="Referência "+String(i+1).padStart(3,"0");
+    let ref="Referência "+String(i+1).padStart(3,"0");
+    // se o grupo não soma zero exato (tolerância aceite), mostra a diferença
+    const soma=g.rows.reduce((s,r)=>s+(valMap.get(r)||0),0);
+    g.dif=soma;
+    if(soma!==0){
+      const difTxt=(Math.abs(soma)/100).toLocaleString("pt-PT",{minimumFractionDigits:2,maximumFractionDigits:2});
+      ref+=" - Dif: "+difTxt+"€";
+    }
     g.ref=ref;
     for(const m of g.rows) asign.set(m,{conc:true,ref:ref,grupo:i+1});
   });
@@ -288,28 +547,35 @@ function mejorSub(cands,objetivo,tol,maxN,budget){
   states.set(0,{size:0,dist:0,list:null});
   for(const c of cands){
     const add=[];
+    const lim=Math.abs(objetivo)+tol;
     for(const [s,st] of states){
       if(st.size>=maxN) continue;
-      add.push([s+c.valor,{size:st.size+1,dist:st.dist+c.dist,list:{idx:c.row,prev:st.list}}]);
+      const ns=s+c.valor;
+      if(Math.abs(ns)>lim) continue;   // poda: já passou do objetivo, não volta atrás
+      add.push([ns,{size:st.size+1,dist:st.dist+c.dist,list:{idx:c.row,prev:st.list}}]);
     }
     for(const [ns,cand] of add){
       const ex=states.get(ns);
       if(!ex||cand.size<ex.size||(cand.size===ex.size&&cand.dist<ex.dist)) states.set(ns,cand);
     }
     budget.ops+=states.size;
-    if(states.size>CAP||budget.ops>budget.max){budget.stopped=true;break;}  // degradação suave
+    if(budget.ops>budget.max){budget.stopped=true;break;}   // limite GLOBAL -> aviso
+    if(states.size>CAP) break;                              // limite por âncora -> silencioso
   }
-  let best=null;
+  let best=null, bestAdiff=Infinity;
   for(const [s,st] of states){
-    if(st.size>=1 && st.size<=maxN && Math.abs(s-objetivo)<=tol){
-      if(!best||st.size<best.size||(st.size===best.size&&st.dist<best.dist)) best=st;
+    const adiff=Math.abs(s-objetivo);
+    if(st.size>=1 && st.size<=maxN && adiff<=tol){
+      if(!best || st.size<best.size ||
+         (st.size===best.size && (adiff<bestAdiff || (adiff===bestAdiff && st.dist<best.dist))))
+        { best=st; bestAdiff=adiff; }
     }
   }
   return best?reconstruir(best.list):null;
 }
 
 // ---------------- integração com o Excel ----------------
-let LAST=null; // {wb, aoa, headerRow, ci_valor, ci_fecha, headers, sheetName, resultado, filename}
+let FILES=[]; let CUR=-1; // lista de ficheiros processados
 
 function findHeaderRow(aoa){
   for(let r=0;r<Math.min(15,aoa.length);r++){
@@ -321,12 +587,12 @@ function findHeaderRow(aoa){
   return {r:0,hdr,cv:detectar(hdr,ALIAS_VALOR,"DEB_CRED"),cf:detectar(hdr,ALIAS_FECHA,"DATA_CERTA")};
 }
 
-function procesar(wb, filename){
+function procesar(wb, filename){  // devolve a entrada processada
   const sheetName=wb.SheetNames[0];
   const ws=wb.Sheets[sheetName];
   const aoa=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,cellDates:true,defval:null});
   const {r:headerRow,hdr,cv,cf}=findHeaderRow(aoa);
-  if(!cv){ alert("Não encontrei a coluna de importes 'DEB_CRED'. Verifica o cabeçalho do Excel."); return; }
+  if(!cv){ alert(t("errNoCol")); return; }
   const ci_valor=hdr.indexOf(cv), ci_fecha=cf?hdr.indexOf(cf):-1;
 
   const filas=[];
@@ -337,18 +603,60 @@ function procesar(wb, filename){
   }
   const cfg={tol:+document.getElementById("tol").value, maxG:+document.getElementById("maxg").value, maxCand:40};
   const resultado=conciliar(filas,cfg);
-  LAST={wb,aoa,headerRow,ci_valor,ci_fecha,headers:hdr,sheetName,resultado,cv,cf,filename};
+  return {wb,aoa,headerRow,ci_valor,ci_fecha,headers:hdr,sheetName,resultado,cv,cf,filename,
+          stopped:!!window.__budget_stopped};
+}
+
+function addFile(wb, filename, isDemo){
+  const entry=procesar(wb, filename);
+  if(!entry) return;
+  entry.isDemo=!!isDemo;
+  if(!isDemo) FILES=FILES.filter(e=>!e.isDemo);   // um ficheiro real substitui o exemplo
+  FILES.push(entry);
+  CUR=FILES.length-1;
   render();
 }
 
+function renderChips(){
+  const box=document.getElementById("sheetbar");
+  if(FILES.length<=1 && FILES.every(e=>e.isDemo)){ box.innerHTML=""; box.classList.add("hidden"); return; }
+  box.classList.remove("hidden");
+  box.innerHTML=FILES.map((e,i)=>{
+    const R=e.resultado.resumen;
+    const nome=e.filename.length>22?e.filename.slice(0,20)+"…":e.filename;
+    const stats=`${plain("mTotal")}: ${R.total} | ${plain("mOk")}: ${R.ok} | ${plain("mNo")}: ${R.no} | ${plain("mSaldo")}: ${fmtEUR(R.saldo)}`;
+    return `<div class="stab ${i===CUR?"active":""}" data-i="${i}" title="${stats}">${ICON.file} ${nome}
+       <span class="x" data-x="${i}" title="remover">×</span></div>`;
+  }).join("");
+  box.querySelectorAll(".stab").forEach(c=>c.addEventListener("click",ev=>{
+    if(ev.target.dataset.x!==undefined){
+      FILES.splice(+ev.target.dataset.x,1);
+      if(!FILES.length){ CUR=-1; document.getElementById("results").classList.add("hidden"); if(typeof syncDemoBtn==="function") syncDemoBtn(); return; }
+      CUR=Math.min(CUR,FILES.length-1); render(); ev.stopPropagation(); return;
+    }
+    CUR=+c.dataset.i; render();
+    c.scrollIntoView({inline:"nearest",block:"nearest"});
+  }));
+  const act=box.querySelector(".stab.active");
+  if(act) act.scrollIntoView({inline:"nearest",block:"nearest"});
+}
+
 function render(){
-  const {aoa,headerRow,headers,resultado,cv,cf}=LAST;
+  if(typeof syncDemoBtn==="function") syncDemoBtn();
+  if(CUR<0||!FILES[CUR]) return;
+  const {aoa,headerRow,headers,resultado,cv,cf}=FILES[CUR];
   document.getElementById("results").classList.remove("hidden");
-  const aviso = window.__budget_stopped
-    ? ` · <span style="color:#a6432b;font-weight:600">⚠️ ficheiro muito grande: algumas conciliações complexas podem não ter sido procuradas</span>`
+  renderChips();
+  const totLin=FILES.reduce((s,e)=>s+e.resultado.resumen.total,0);
+  document.getElementById("filesum").innerHTML=
+    t("filesSum").replace("{n}",FILES.length).replace("{l}",totLin.toLocaleString("pt-PT"));
+  const aviso = FILES[CUR].stopped
+    ? ` · <span style="color:#a6432b;font-weight:600">${t("warnBig")}</span>`
     : "";
   document.getElementById("detected").innerHTML=
-    `Colunas detetadas — importes: <span class="badge">${cv}</span> · data: <span class="badge">${cf||"—"}</span> · cabeçalho na linha ${headerRow+1}${aviso}`;
+    t("detected").replace("{v}",`<span class="badge">${cv}</span>`)
+                 .replace("{f}",`<span class="badge">${cf||"—"}</span>`)
+                 .replace("{r}",headerRow+1) + aviso;
   const R=resultado.resumen;
   document.getElementById("m-total").textContent=R.total;
   document.getElementById("m-ok").textContent=R.ok;
@@ -370,9 +678,11 @@ function render(){
       for(let i=0;i<cols.length;i++){
         let v=rowArr[i];
         if(v instanceof Date) v=v.toLocaleDateString("pt-PT");
+        else if(typeof v==="number" && !Number.isInteger(v))
+          v=v.toLocaleString("pt-PT",{minimumFractionDigits:2,maximumFractionDigits:2});
         html+=`<td>${v==null?"":v}</td>`;
       }
-      html+=`<td><span class="pill ${a.conc?"ok":"no"}">${a.conc?"VERDADEIRO":"FALSO"}</span></td>`;
+      html+=`<td><span class="pill ${a.conc?"ok":"no"}">${a.conc?t("pillTrue"):t("pillFalse")}</span></td>`;
       html+=`<td class="ref">${a.ref}</td></tr>`;
     }
     return html+"</tbody>";
@@ -383,51 +693,136 @@ function render(){
   // grupos
   let g="";
   for(const grp of resultado.grupos){
+    const tipoTxt = grp.tipo==="fatura+pagamento (1:1)" ? t("grpType1") : t("grpTypeN");
     g+=`<div class="grp"><div class="h">${grp.ref}</div>
-        <div class="muted">${grp.tipo} · linhas Excel ${grp.rows.map(x=>x+1).join(", ")}</div></div>`;
+        <div class="muted">${tipoTxt} · ${t("grpRows")} ${grp.rows.map(x=>x+1).join(", ")}</div></div>`;
   }
-  if(!resultado.grupos.length) g=`<div class="muted">Sem grupos conciliados.</div>`;
+  if(!resultado.grupos.length) g=`<div class="muted">${t("grpEmpty")}</div>`;
   document.getElementById("view-groups").innerHTML=g;
 }
 
-function descargar(){
-  const {wb,aoa,headerRow,headers,resultado,sheetName,filename}=LAST;
-  const out=aoa.map(r=>r?r.slice():[]);
-  const cc=headers.length, ci=headers.length+1;
-  out[headerRow]=out[headerRow]||[];
-  out[headerRow][cc]="CONCILIADO"; out[headerRow][ci]="INFORMAÇÃO";
-  for(let r=headerRow+1;r<out.length;r++){
-    const a=resultado.asign.get(r); if(!a) continue;
-    out[r][cc]=a.conc; out[r][ci]=a.ref;
+async function descargar(){
+  if(!FILES.length) return;
+  // Um único ficheiro de saída com UMA FOLHA POR CADA Excel carregado.
+  const wb2=new ExcelJS.Workbook();
+  const FONT={name:"Calibri",size:10};
+  const FONT_H={name:"Calibri",size:10,bold:true};
+  const usados=new Set();
+  for(const E of FILES){
+    const {aoa,headerRow,headers,resultado,filename}=E;
+    const out=aoa.map(r=>r?r.slice():[]);
+    const cc=headers.length, ci=headers.length+1;
+    out[headerRow]=out[headerRow]||[];
+    out[headerRow][cc]="CONCILIADO"; out[headerRow][ci]="INFORMAÇÃO";
+    for(let r=headerRow+1;r<out.length;r++){
+      const a=resultado.asign.get(r); if(!a) continue;
+      out[r][cc]=a.conc; out[r][ci]=a.ref;
+    }
+    // nome de folha: nome do ficheiro sem extensão, saneado e único (máx. 31)
+    let nome=(filename||"Conta Corrente").replace(/\.[^.]+$/,"")
+      .replace(/[\\\/\*\?\:\[\]]/g,"-").substring(0,28)||"Folha";
+    let base=nome,k=2; while(usados.has(nome)){nome=base.substring(0,25)+"~"+k++;}
+    usados.add(nome);
+    const ws2=wb2.addWorksheet(nome,{views:[{showGridLines:false}]});
+    out.forEach((rowArr,ri)=>{
+      const row=ws2.getRow(ri+1);
+      (rowArr||[]).forEach((v,ciX)=>{
+        if(v===undefined) return;
+        const cell=row.getCell(ciX+1);
+        cell.value=v;
+        cell.font=(ri===headerRow)?FONT_H:FONT;
+        if(v instanceof Date) cell.numFmt="dd-mm-yyyy";
+      });
+      row.commit && row.commit();
+    });
+    ws2.getColumn(cc+1).width=13; ws2.getColumn(ci+1).width=26;
   }
-  const ws=XLSX.utils.aoa_to_sheet(out,{cellDates:true});
-  // marcar a coluna CONCILIADO como booleano real
-  const col=XLSX.utils.encode_col(cc);
-  for(let r=headerRow+1;r<out.length;r++){
-    const a=resultado.asign.get(r); if(!a) continue;
-    const ref=col+(r+1);
-    ws[ref]={t:"b",v:!!a.conc};
-  }
-  const nwb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(nwb,ws,sheetName||"Conta Corrente");
-  const base=(filename||"conta_corrente").replace(/\.[^.]+$/,"");
-  XLSX.writeFile(nwb, base+"_CONCILIADO.xlsx");
+  const buf=await wb2.xlsx.writeBuffer();
+  const nomeOut = FILES.length>1
+    ? `CONCILIADO_${FILES.length}_ficheiros.xlsx`
+    : (FILES[0].filename||"conta_corrente").replace(/\.[^.]+$/,"")+"_CONCILIADO.xlsx";
+  const blob=new Blob([buf],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob); a.download=nomeOut;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);
 }
 
 // ---------------- dados de demonstração ----------------
 function demoWorkbook(){
+  // Gera uma conta corrente realista (~300 linhas): FT, NC, pagamentos e
+  // transferências. Determinística (mesma de cada vez) graças a um PRNG com
+  // semente fixa.
+  const rndGen=(s=>()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296;})(20240731);
+  const pad=(n,l)=>String(n).padStart(l,"0");
+  const money=(a,b)=>Math.round((a+rndGen()*(b-a))*100)/100;
+  const items=[]; // {m,d,desc,val,diario}
+  let ft=101, nc=11;
+  const addFT =(m,d,v)=>{items.push({m,d,desc:`FT 2024/${ft} Inquieto Mobilidade`,val:-v,diario:56});return ft++;};
+  const addNC =(m,d,v)=>{items.push({m,d,desc:`NC 2024/${pad(nc,3)} (nota de crédito)`,val:v,diario:57});return nc++;};
+  const addPag=(m,d,v,ref)=>items.push({m,d,desc:`Pagamento FT 2024/${ref}`,val:v,diario:3});
+  const addTrf=(m,d,v,txt)=>items.push({m,d,desc:`Transferência ${txt}`,val:v,diario:3});
+
+  // A) 90 pares exatos FT -> pagamento
+  for(let i=0;i<90;i++){
+    const m=1+Math.floor(rndGen()*11), d=1+Math.floor(rndGen()*25);
+    const v=money(80,4800);
+    const n=addFT(m,d,v);
+    let pm=m+(rndGen()<0.35?1:0); if(pm>12)pm=12;
+    addPag(pm,1+Math.floor(rndGen()*26),v,n);
+  }
+  // B) 14 transferências que saldam 2-4 FT
+  for(let i=0;i<14;i++){
+    const m=1+Math.floor(rndGen()*10);
+    const k=2+Math.floor(rndGen()*3); let soma=0; const refs=[];
+    for(let j=0;j<k;j++){
+      const v=money(60,1900); soma+=v;
+      refs.push(addFT(m,1+Math.floor(rndGen()*22),v));
+    }
+    soma=Math.round(soma*100)/100;
+    addTrf(m+1>12?12:m+1,1+Math.floor(rndGen()*26),soma,`- liquidação FT ${refs.join(", ")}`);
+  }
+  // C) 7 grupos FT + NC + pagamento (exatos)
+  for(let i=0;i<7;i++){
+    const m=1+Math.floor(rndGen()*10);
+    const v=money(400,3200), vn=money(40,Math.min(300,v/3));
+    const n=addFT(m,1+Math.floor(rndGen()*20),v);
+    addNC(m,1+Math.floor(rndGen()*24),vn);
+    addPag(m+1>12?12:m+1,1+Math.floor(rndGen()*26),Math.round((v-vn)*100)/100,n);
+  }
+  // D) 6 pares com diferença de cêntimos (0,01-0,02) -> "Dif:" com tolerância por defeito
+  for(let i=0;i<6;i++){
+    const m=2+Math.floor(rndGen()*9);
+    const v=money(150,2400);
+    const n=addFT(m,1+Math.floor(rndGen()*22),v);
+    const dif=(i%2===0)?0.01:0.02;
+    addPag(m,10+Math.floor(rndGen()*15),Math.round((v-dif)*100)/100,n);
+  }
+  // E) 3 grupos com diferença maior (0,30-0,44) -> aparecem ao subir a tolerância a ±0,50
+  const bigDifs=[0.44,0.35,0.30];
+  for(let i=0;i<3;i++){
+    const m=3+Math.floor(rndGen()*8);
+    const v1=money(300,1600), v2=money(200,1100);
+    const r1=addFT(m,1+Math.floor(rndGen()*18),v1);
+    const r2=addFT(m,2+Math.floor(rndGen()*18),v2);
+    addTrf(m+1>12?12:m+1,1+Math.floor(rndGen()*26),
+      Math.round((v1+v2-bigDifs[i])*100)/100,`- liquidação FT ${r1}, ${r2}`);
+  }
+  // F) linhas em aberto: 16 FT recentes sem pagamento, 4 pagamentos órfãos, 3 NC soltas
+  for(let i=0;i<16;i++) addFT(11+Math.floor(rndGen()*2),1+Math.floor(rndGen()*26),money(5200,9800)+0.007);
+  for(let i=0;i<4;i++) addTrf(11+Math.floor(rndGen()*2),1+Math.floor(rndGen()*26),money(120,480)+0.003,"- adiantamento s/ fatura");
+  for(let i=0;i<3;i++) addNC(10+Math.floor(rndGen()*3),1+Math.floor(rndGen()*24),money(30,420)+0.009);
+
+  items.sort((a,b)=>(a.m-b.m)||(a.d-b.d));
   const cols=["Fornecedor","Data Lanç.","DATA_CERTA","Período","Diário","Doc. Interno","Doc. Externo","Descritivo","Descrição","DEBITO","CREDITO","DEB_CRED"];
-  const filas=[
-    ["221110078 - Inquieto Mobily","31-07-2024","31-07-2024",2024071,3,1,"2024-07-31 00005 750001","Nota de Lançamento","09/07 -Inquieto Mobili",992.63,null,992.63],
-    ["221110078 - Inquieto Mobily","31-07-2024","22-07-2024",2024071,56,50,"2024-07-22 00003 730034","Nota de Lançamento","FT 2024/221 Inquieto Mobilidade",null,992.63,-992.63],
-    ["221110078 - Inquieto Mobily","31-08-2024","31-08-2024",2024081,3,1,"2024-08-30 00005 850001","Nota de Lançamento","06/08 -Inquieto",992.63,null,992.63],
-    ["221110078 - Inquieto Mobily","31-08-2024","30-08-2024",2024081,56,43,"2024-08-30 00003 830025","Nota de Lançamento","FT 2024/250 Inquieto Mobilidade",null,2108.04,-2108.04],
-    ["221110078 - Inquieto Mobily","30-09-2024","30-09-2024",2024091,3,1,"2024-09-30 00005 950001","Nota de Lançamento","09/09 -Inquieto",1079.02,null,1079.02],
-    ["221110078 - Inquieto Mobily","30-09-2024","30-09-2024",2024091,3,1,"2024-09-30 00005 950001","Nota de Lançamento","09/09 -Inquieto",1029.02,null,1029.02],
-    ["221110078 - Inquieto Mobily","15-10-2024","10-10-2024",2024101,56,61,"2024-10-10 00003 100061","Nota de Lançamento","FT 2024/300",null,1500.00,-1500.00],
-    ["221110078 - Inquieto Mobily","15-10-2024","12-10-2024",2024101,57,62,"2024-10-12 00004 100062","Nota de Lançamento","NC 2024/030 (nota crédito)",200.00,null,200.00],
-    ["221110078 - Inquieto Mobily","15-10-2024","20-10-2024",2024101,3,5,"2024-10-20 00005 100063","Nota de Lançamento","Pagamento FT300",1300.00,null,1300.00],
-  ];
+  const filas=items.map((it,i)=>{
+    const v=Math.round(it.val*100)/100;
+    const data=`${pad(it.d,2)}-${pad(it.m,2)}-2024`;
+    return ["221110078 - Inquieto Mobily",data,data,Number(`2024${pad(it.m,2)}1`),it.diario,i+1,
+      `2024-${pad(it.m,2)}-${pad(it.d,2)} 000${it.diario===3?5:3} ${pad(700000+i,6)}`,
+      "Nota de Lançamento",it.desc,
+      v>0?v:null, v<0?-v:null, v];
+  });
   const ws=XLSX.utils.aoa_to_sheet([cols,...filas]);
   const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,"Conta Corrente");
   return wb;
@@ -439,14 +834,42 @@ drop.addEventListener("click",()=>file.click());
 drop.addEventListener("dragover",e=>{e.preventDefault();drop.classList.add("hover")});
 drop.addEventListener("dragleave",()=>drop.classList.remove("hover"));
 drop.addEventListener("drop",e=>{e.preventDefault();drop.classList.remove("hover");
-  if(e.dataTransfer.files.length) leerFichero(e.dataTransfer.files[0]);});
-file.addEventListener("change",e=>{ if(e.target.files.length) leerFichero(e.target.files[0]); });
-function leerFichero(f){
-  const reader=new FileReader();
-  reader.onload=ev=>{ const wb=XLSX.read(ev.target.result,{type:"array",cellDates:true}); procesar(wb,f.name); };
-  reader.readAsArrayBuffer(f);
+  if(e.dataTransfer.files.length) leerFicheros(e.dataTransfer.files);});
+file.addEventListener("change",e=>{ if(e.target.files.length) leerFicheros(e.target.files); e.target.value=""; });
+async function leerFicheros(lista){
+  const files=[...lista];
+  const prog=document.getElementById("progress");
+  const ptxt=document.getElementById("progress-txt");
+  for(let i=0;i<files.length;i++){
+    if(files.length>1){
+      prog.classList.remove("hidden");
+      ptxt.textContent=t("processing").replace("{i}",i+1).replace("{n}",files.length)+" — "+files[i].name;
+      await new Promise(r=>setTimeout(r,25));   // deixa o navegador pintar o progresso
+    }
+    try{
+      const buf=await files[i].arrayBuffer();
+      const wb=XLSX.read(buf,{type:"array",cellDates:true});
+      addFile(wb,files[i].name,false);
+    }catch(err){ console.error("Erro em",files[i].name,err); }
+  }
+  prog.classList.add("hidden");
 }
-document.getElementById("demo").addEventListener("click",()=>procesar(demoWorkbook(),"demo_conta_corrente.xlsx"));
+function syncDemoBtn(){
+  const btn=document.getElementById("demo");
+  btn.dataset.i18n=FILES.some(e=>e.isDemo)?"btnDemoHide":"btnDemo";
+  btn.innerHTML=t(btn.dataset.i18n);
+}
+document.getElementById("demo").addEventListener("click",()=>{
+  const i=FILES.findIndex(e=>e.isDemo);
+  if(i>=0){                                  // já visível -> ocultar
+    FILES.splice(i,1);
+    if(!FILES.length){ CUR=-1; document.getElementById("results").classList.add("hidden"); }
+    else { CUR=Math.min(CUR,FILES.length-1); render(); }
+  } else {
+    addFile(demoWorkbook(),"exemplo.xlsx",true);
+  }
+  syncDemoBtn();
+});
 document.getElementById("download").addEventListener("click",descargar);
 document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{
   document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
@@ -457,10 +880,114 @@ document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{
   document.getElementById("view-groups").classList.toggle("hidden",v!=="groups");
 }));
 [document.getElementById("tol"),document.getElementById("maxg")].forEach(el=>
-  el.addEventListener("change",()=>{ if(LAST) procesar(LAST.wb,LAST.filename); }));
+  el.addEventListener("change",()=>{
+    if(!FILES.length) return;
+    const olds=FILES.map(e=>({wb:e.wb,filename:e.filename,isDemo:e.isDemo}));
+    const cur=CUR; FILES=[];
+    olds.forEach(o=>{ const en=procesar(o.wb,o.filename); if(en){en.isDemo=o.isDemo; FILES.push(en);} });
+    CUR=Math.min(cur,FILES.length-1); render();
+  }));
+// tema claro/escuro
+const btnTheme=document.getElementById("btn-theme");
+btnTheme.innerHTML=ICON.moon;
+btnTheme.addEventListener("click",()=>{
+  const dark=document.documentElement.dataset.theme==="dark";
+  document.documentElement.dataset.theme=dark?"":"dark";
+  btnTheme.innerHTML=dark?ICON.moon:ICON.sun;
+});
 
 // mostra o exemplo automaticamente ao abrir
-window.addEventListener("load",()=>document.getElementById("demo").click());
+window.addEventListener("load",()=>{applyLang(LANG);document.getElementById("demo").click();});
+</script>
+
+<!-- Modal de instruções -->
+<div id="overlay" class="overlay hidden">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 data-i18n="modalTitle">📘 Instruções</h2>
+      <button class="close" id="modal-close" title="Fechar">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="step"><div class="n">1</div><div class="t" data-i18n="step1"><b>Carrega ou arrasta</b> o teu ficheiro para a área indicada. Formatos aceites: <b>.xlsx</b>, <b>.xlsm</b>, <b>.xlsb</b>, <b>.xls</b> (97-2003), <b>.csv</b> e <b>.ods</b>.</div></div>
+      <div class="step"><div class="n">2</div><div class="t" data-i18n="step2">Para funcionar, o teu Excel tem de cumprir <b>dois requisitos</b> nas colunas:</div></div>
+
+      <div class="callout a">
+        <span data-i18n="calloutA">📅 A coluna das <b>datas</b> tem de se chamar exatamente <code>DATA_CERTA</code>.
+        <div class="muted" style="margin-top:6px">A ordem das colunas pode ser qualquer — a app procura-a pelo nome.</div></span>
+      </div>
+
+      <div class="callout b">
+        <span data-i18n="calloutB">💶 Tem de existir <b>uma única coluna</b> chamada <code>DEB_CRED</code> com todos os valores:
+        <div style="margin-top:8px">
+          • valores a <b>débito</b> com sinal <span class="plus">positivo (+)</span> &nbsp;→&nbsp; ex.: <b>992,63</b><br>
+          • valores a <b>crédito</b> com sinal <span class="minus">negativo (−)</span> &nbsp;→&nbsp; ex.: <b>−992,63</b>
+        </div></span>
+      </div>
+
+      <div class="step"><div class="n">3</div><div class="t" data-i18n="step3">A app procura as linhas cujo <b>DEB_CRED soma zero</b> e marca-as como conciliadas. As que não casam ficam <b>SEM IDENTIFICAR</b> e formam o saldo em aberto.</div></div>
+      <div class="step"><div class="n">4</div><div class="t" data-i18n="step4">Descarrega o <b>Excel conciliado</b>, já com as colunas <b>CONCILIADO</b> (VERDADEIRO/FALSO) e <b>INFORMAÇÃO</b> (Referência 001, 002…).</div></div>
+
+      <div class="step"><div class="n">5</div><div class="t" data-i18n="step5">Podes carregar <b>vários ficheiros de uma vez</b> — a descarga junta tudo num só Excel, com <b>uma folha por ficheiro</b>. O que conta é o <b>total de linhas</b>: até <b>~20.000 linhas</b> somadas é imediato; até <b>~50.000</b> funciona com uma espera de alguns segundos.</div></div>
+
+      <button class="btn" id="modal-ok" style="margin-top:6px" data-i18n="modalOk">Percebi 👍</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const ov=document.getElementById("overlay");
+  const open=()=>ov.classList.remove("hidden");
+  const close=()=>ov.classList.add("hidden");
+  document.getElementById("btn-instr").addEventListener("click",open);
+  document.getElementById("modal-close").addEventListener("click",close);
+  document.getElementById("modal-ok").addEventListener("click",close);
+  ov.addEventListener("click",e=>{if(e.target===ov)close();});
+
+  // --- desplegables personalizados (sustituem os <select> nativos) ---
+  function closeAllDD(){
+    document.querySelectorAll(".dd.open").forEach(d=>{
+      d.classList.remove("open"); d.querySelector(".dd-menu").classList.add("hidden");
+    });
+  }
+  function enhance(sel){
+    sel.style.display="none";
+    const dd=document.createElement("div"); dd.className="dd";
+    const btn=document.createElement("div"); btn.className="dd-btn";
+    const lab=document.createElement("span");
+    const chev=document.createElement("span"); chev.className="chev"; chev.textContent="▾";
+    btn.appendChild(lab); btn.appendChild(chev);
+    const menu=document.createElement("div"); menu.className="dd-menu hidden";
+    [...sel.options].forEach((o,i)=>{
+      const it=document.createElement("div"); it.className="dd-opt";
+      const t=document.createElement("span"); t.textContent=o.textContent; it.appendChild(t);
+      it.addEventListener("click",ev=>{
+        ev.stopPropagation();
+        sel.selectedIndex=i;
+        sel.dispatchEvent(new Event("change",{bubbles:true}));
+        sync(); closeAllDD();
+      });
+      menu.appendChild(it);
+    });
+    function sync(){
+      lab.textContent=sel.options[sel.selectedIndex].textContent;
+      [...menu.children].forEach((c,i)=>c.classList.toggle("sel",i===sel.selectedIndex));
+    }
+    btn.addEventListener("click",ev=>{
+      ev.stopPropagation();
+      const open=menu.classList.contains("hidden");
+      closeAllDD();
+      if(open){ dd.classList.add("open"); menu.classList.remove("hidden"); }
+    });
+    dd.appendChild(btn); dd.appendChild(menu);
+    sel.parentNode.insertBefore(dd, sel.nextSibling);
+    sync();
+  }
+  ["tol","maxg"].forEach(id=>{ const s=document.getElementById(id); if(s) enhance(s); });
+  document.addEventListener("click",closeAllDD);
+  document.querySelectorAll("#langs .lang").forEach(b=>
+    b.addEventListener("click",()=>applyLang(b.dataset.lang)));
+})();
 </script>
 </body>
 </html>

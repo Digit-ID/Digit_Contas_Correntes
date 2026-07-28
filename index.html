@@ -203,13 +203,33 @@ function conciliar(filas, cfg){
   for(const f of filas){ if(f.valor!=null && f.valor!==0) pend.set(f.row,f); }
   const grupos=[]; let gid=0;
 
-  // Fase 1: 1:1 global por importe oposto + data mais próxima
-  const activas=[...pend.values()].sort((a,b)=>a.row-b.row);
+  // Fase 1: 1:1 por importe oposto + data mais próxima.
+  // Agrupa por magnitude para NÃO gerar todos os pares (evita esgotar a
+  // memória quando há milhares de linhas com o mesmo valor). Só se comparam
+  // linhas cujo valor absoluto coincide (dentro da tolerância).
+  const dn=x=>x?x.getTime():0;
+  const posMap=new Map(), negMap=new Map();   // |valor|(cents) -> [linhas]
+  for(const f of pend.values()){
+    const k=Math.abs(f.valor);
+    const m=f.valor>0?posMap:negMap;
+    if(m.has(k)) m.get(k).push(f); else m.set(k,[f]);
+  }
   const pares=[];
-  for(let i=0;i<activas.length;i++)for(let j=i+1;j<activas.length;j++){
-    const a=activas[i],b=activas[j];
-    if(Math.abs(a.valor+b.valor)<=tol && (a.valor>0)!==(b.valor>0))
-      pares.push([dayDist(a.fecha,b.fecha),a.row,b.row]);
+  const PAIR_CAP=2000000; let overflow=false;
+  for(const [k,posList] of posMap){
+    for(let d=-tol; d<=tol && !overflow; d++){
+      const negList=negMap.get(k+d);
+      if(!negList) continue;
+      if(posList.length*negList.length<=4000){
+        for(const p of posList) for(const nn of negList) pares.push([dayDist(p.fecha,nn.fecha),p.row,nn.row]);
+      } else {                                 // bucket enorme -> dois ponteiros por data
+        const P=[...posList].sort((a,b)=>dn(a.fecha)-dn(b.fecha));
+        const N=[...negList].sort((a,b)=>dn(a.fecha)-dn(b.fecha));
+        for(let i=0;i<P.length&&i<N.length;i++) pares.push([dayDist(P[i].fecha,N[i].fecha),P[i].row,N[i].row]);
+      }
+      if(pares.length>PAIR_CAP) overflow=true;
+    }
+    if(overflow) break;
   }
   pares.sort((p,q)=>p[0]-q[0]||p[1]-q[1]||p[2]-q[2]);
   for(const [d,ra,rb] of pares){
@@ -220,20 +240,23 @@ function conciliar(filas, cfg){
   }
 
   // Fase 2: subconjunto que soma zero (um pagamento salda várias faturas)
+  const budget={ops:0, max:5000000, stopped:false};   // orçamento global de trabalho
   const restantes=[...pend.keys()].sort((x,y)=>Math.abs(pend.get(y).valor)-Math.abs(pend.get(x).valor));
   for(const row of restantes){
+    if(budget.ops>budget.max) break;                   // segurança: nunca bloquear
     if(!pend.has(row)) continue;
     const ancla=pend.get(row), objetivo=-ancla.valor;
     let cands=[...pend.values()].filter(g=>g.row!==row && (g.valor>0)!==(ancla.valor>0))
       .map(g=>({row:g.row,valor:g.valor,dist:dayDist(g.fecha,ancla.fecha)}));
     cands.sort((a,b)=>a.dist-b.dist);
     cands=cands.slice(0,maxCand);
-    const combo=mejorSub(cands,objetivo,tol,maxG-1);
+    const combo=mejorSub(cands,objetivo,tol,maxG-1,budget);
     if(combo){
       gid++; grupos.push({id:gid,rows:[row,...combo],tipo:"pagamento de várias faturas"});
       for(const m of [row,...combo]) pend.delete(m);
     }
   }
+  window.__budget_stopped = budget.stopped || budget.ops>budget.max;
 
   // atribuição + numeração de referências por ordem de aparição
   const asign=new Map();
@@ -250,26 +273,31 @@ function conciliar(filas, cfg){
   let saldo=0; for(const f of filas){ if(f.valor && !asign.get(f.row).conc) saldo+=f.valor; }
   return {asign,grupos,resumen:{total,ok,no:total-ok,grupos:grupos.length,saldo}};
 }
+// Reconstrói a lista de linhas a partir de uma lista ligada imutável.
+function reconstruir(list){const o=[];while(list){o.push(list.idx);list=list.prev;}return o;}
+
 // Subconjunto que soma ~objetivo, com programação dinâmica (0/1 knapsack por
-// soma). Aguanta grupos grandes (até 'maxN' linhas) sem bloquear o navegador.
-// Prefere o grupo com MENOS linhas e, em empate, com datas mais próximas.
-function mejorSub(cands,objetivo,tol,maxN){
+// soma). Usa lista ligada (sem copiar arrays) e um orçamento global de
+// trabalho para NUNCA bloquear o navegador. Prefere o grupo com MENOS linhas
+// e, em empate, com datas mais próximas.
+function mejorSub(cands,objetivo,tol,maxN,budget){
   const n=cands.length; maxN=Math.min(maxN,n);
   if(n===0||maxN<1) return null;
-  const CAP=400000;                       // limite de estados (segurança)
-  let states=new Map();                   // soma(cents) -> {size,dist,rows}
-  states.set(0,{size:0,dist:0,rows:[]});
+  const CAP=60000;                        // limite de estados por âncora
+  let states=new Map();                   // soma(cents) -> {size,dist,list}
+  states.set(0,{size:0,dist:0,list:null});
   for(const c of cands){
     const add=[];
     for(const [s,st] of states){
       if(st.size>=maxN) continue;
-      add.push([s+c.valor,{size:st.size+1,dist:st.dist+c.dist,rows:st.rows.concat(c.row)}]);
+      add.push([s+c.valor,{size:st.size+1,dist:st.dist+c.dist,list:{idx:c.row,prev:st.list}}]);
     }
     for(const [ns,cand] of add){
       const ex=states.get(ns);
       if(!ex||cand.size<ex.size||(cand.size===ex.size&&cand.dist<ex.dist)) states.set(ns,cand);
     }
-    if(states.size>CAP) break;            // degradação suave se for enorme
+    budget.ops+=states.size;
+    if(states.size>CAP||budget.ops>budget.max){budget.stopped=true;break;}  // degradação suave
   }
   let best=null;
   for(const [s,st] of states){
@@ -277,7 +305,7 @@ function mejorSub(cands,objetivo,tol,maxN){
       if(!best||st.size<best.size||(st.size===best.size&&st.dist<best.dist)) best=st;
     }
   }
-  return best?best.rows:null;
+  return best?reconstruir(best.list):null;
 }
 
 // ---------------- integração com o Excel ----------------
@@ -316,8 +344,11 @@ function procesar(wb, filename){
 function render(){
   const {aoa,headerRow,headers,resultado,cv,cf}=LAST;
   document.getElementById("results").classList.remove("hidden");
+  const aviso = window.__budget_stopped
+    ? ` · <span style="color:#a6432b;font-weight:600">⚠️ ficheiro muito grande: algumas conciliações complexas podem não ter sido procuradas</span>`
+    : "";
   document.getElementById("detected").innerHTML=
-    `Colunas detetadas — importes: <span class="badge">${cv}</span> · data: <span class="badge">${cf||"—"}</span> · cabeçalho na linha ${headerRow+1}`;
+    `Colunas detetadas — importes: <span class="badge">${cv}</span> · data: <span class="badge">${cf||"—"}</span> · cabeçalho na linha ${headerRow+1}${aviso}`;
   const R=resultado.resumen;
   document.getElementById("m-total").textContent=R.total;
   document.getElementById("m-ok").textContent=R.ok;

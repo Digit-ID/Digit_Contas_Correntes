@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conciliador de Conta Corrente</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{
+    --bg:#f6f7fb; --card:#ffffff; --ink:#1f2430; --muted:#6b7280;
+    --line:#e6e8ef; --accent:#3b5bdb; --accent-ink:#fff;
+    --ok-bg:#e2efda; --ok-ink:#2f6f3b; --no-bg:#fce4d6; --no-ink:#a6432b;
+    --chip:#eef1fb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--ink);font-size:14px;line-height:1.45}
+  header{padding:18px 22px;background:linear-gradient(135deg,#3b5bdb,#5f78e8);color:#fff}
+  header h1{margin:0;font-size:19px;display:flex;align-items:center;gap:9px}
+  header p{margin:6px 0 0;font-size:13px;opacity:.92;max-width:760px}
+  .wrap{padding:18px 22px;max-width:1100px;margin:0 auto}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px;
+    box-shadow:0 1px 2px rgba(20,30,60,.04)}
+  .drop{border:2px dashed #c3cbe6;border-radius:12px;padding:26px;text-align:center;cursor:pointer;
+    transition:.15s;background:#fbfcff}
+  .drop.hover{border-color:var(--accent);background:#f2f5ff}
+  .drop b{color:var(--accent)}
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .btn{background:var(--accent);color:var(--accent-ink);border:none;border-radius:9px;padding:9px 15px;
+    font-size:13px;font-weight:600;cursor:pointer}
+  .btn.ghost{background:var(--chip);color:var(--accent)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  select{padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:13px}
+  label.fld{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+  .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .metric{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .metric .k{font-size:12px;color:var(--muted)}
+  .metric .v{font-size:22px;font-weight:700;margin-top:3px}
+  .tabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+  .tab{padding:7px 13px;border-radius:8px;background:var(--chip);color:#3a4256;cursor:pointer;font-size:13px;font-weight:600}
+  .tab.active{background:var(--accent);color:#fff}
+  .tblwrap{overflow:auto;max-height:440px;border:1px solid var(--line);border-radius:10px}
+  table{border-collapse:collapse;width:100%;font-size:12.5px;white-space:nowrap}
+  th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left}
+  th{position:sticky;top:0;background:#f0f2f8;z-index:1;font-size:11.5px;text-transform:uppercase;letter-spacing:.3px;color:#556}
+  tr.ok td{background:var(--ok-bg)}
+  tr.no td{background:var(--no-bg)}
+  .pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
+  .pill.ok{background:var(--ok-ink);color:#fff}
+  .pill.no{background:var(--no-ink);color:#fff}
+  .ref{font-weight:600}
+  .grp{padding:9px 12px;border:1px solid var(--line);border-radius:9px;margin-bottom:8px;background:#fbfcff}
+  .grp .h{font-weight:700;color:var(--accent)}
+  .muted{color:var(--muted)}
+  .num{text-align:right;font-variant-numeric:tabular-nums}
+  .hidden{display:none}
+  .note{font-size:12px;color:var(--muted);margin-top:8px}
+  .badge{background:#eef1fb;color:#3a4256;border-radius:6px;padding:2px 7px;font-size:11.5px;font-weight:600}
+</style>
+</head>
+<body>
+<header>
+  <h1>✅ Conciliador de Conta Corrente de Fornecedores</h1>
+  <p>Encontra as linhas cujo <b>DEB_CRED soma zero</b> (fatura + pagamento, faturas com vários
+     pagamentos, notas de crédito), marca-as como conciliadas e deixa visíveis as linhas
+     soltas que compõem o saldo. Tudo corre no teu navegador — nenhum ficheiro sai do teu computador.</p>
+</header>
+
+<div class="wrap">
+  <div class="card">
+    <div id="drop" class="drop">
+      <div style="font-size:26px">📄</div>
+      <div>Arrasta aqui o teu Excel ou <b>clica para escolher</b> (.xlsx)</div>
+      <input id="file" type="file" accept=".xlsx,.xlsm" class="hidden">
+    </div>
+    <div class="row" style="margin-top:12px;justify-content:space-between">
+      <div class="row">
+        <label class="fld">Tolerância
+          <select id="tol">
+            <option value="1" selected>± 0,01 €</option>
+            <option value="0">Exato (0,00)</option>
+            <option value="5">± 0,05 €</option>
+            <option value="10">± 0,10 €</option>
+          </select>
+        </label>
+        <label class="fld">Máx. linhas por grupo
+          <select id="maxg">
+            <option>3</option><option>4</option><option selected>5</option><option>6</option><option>7</option>
+          </select>
+        </label>
+      </div>
+      <button id="demo" class="btn ghost">▶ Ver exemplo</button>
+    </div>
+  </div>
+
+  <div id="results" class="hidden">
+    <div class="card">
+      <div class="row" style="justify-content:space-between;margin-bottom:12px">
+        <div id="detected" class="muted"></div>
+        <button id="download" class="btn">⬇️ Descarregar Excel conciliado</button>
+      </div>
+      <div class="metrics">
+        <div class="metric"><div class="k">Linhas totais</div><div class="v" id="m-total">–</div></div>
+        <div class="metric"><div class="k">Conciliadas ✅</div><div class="v" id="m-ok" style="color:var(--ok-ink)">–</div></div>
+        <div class="metric"><div class="k">Soltas ❌</div><div class="v" id="m-no" style="color:var(--no-ink)">–</div></div>
+        <div class="metric"><div class="k">Saldo em aberto</div><div class="v" id="m-saldo">–</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="tabs">
+        <div class="tab active" data-t="all">📋 Tudo</div>
+        <div class="tab" data-t="loose">❌ Soltas (saldo)</div>
+        <div class="tab" data-t="groups">🔗 Grupos</div>
+      </div>
+      <div id="view-all"><div class="tblwrap"><table id="tbl"></table></div></div>
+      <div id="view-loose" class="hidden"><div class="tblwrap"><table id="tbl-loose"></table></div>
+        <div class="note">Estas são as linhas que não casam com nada e compõem o saldo atual da conta.</div></div>
+      <div id="view-groups" class="hidden"></div>
+    </div>
+    <div class="note">A coluna <b>CONCILIADO</b> sai como VERDADEIRO/FALSO. No Excel podes selecioná-la e usar
+      <b>Inserir → Caixa de verificação</b> para a tornar clicável.</div>
+  </div>
+</div>
+
+<script>
+// ---------------- utilidades ----------------
+function normHeader(v){
+  if(v==null) return "";
+  return String(v).normalize("NFKD").replace(/[̀-ͯ]/g,"").replace(/[^A-Za-z0-9]/g,"").toUpperCase();
+}
+const ALIAS_VALOR = new Set(["DEBCRED","DEBECRED","DEBITOCREDITO","SALDO","VALOR"]);
+const ALIAS_FECHA = new Set(["DATACERTA","FECHACIERTA","FECHA","DATA","DATALANC","DATALANCAMENTO"]);
+function detectar(headers, alias, pref){
+  const np = normHeader(pref);
+  for(const h of headers) if(normHeader(h)===np) return h;
+  for(const h of headers) if(alias.has(normHeader(h))) return h;
+  for(const h of headers) if(np && normHeader(h).includes(np)) return h;
+  return null;
+}
+function toCents(v){
+  if(v==null) return null;
+  if(typeof v==="number") return Math.round(v*100);
+  let s=String(v).trim();
+  if(s===""||s==="-"||s==="—"||s==="–") return null;
+  let neg=false;
+  if(s.startsWith("(")&&s.endsWith(")")){neg=true;s=s.slice(1,-1);}
+  s=s.replace(/€/g,"").replace(/\s/g,"");
+  const hasC=s.includes(","), hasD=s.includes(".");
+  if(hasC&&hasD){ s = s.lastIndexOf(",")>s.lastIndexOf(".") ? s.replace(/\./g,"").replace(",",".") : s.replace(/,/g,""); }
+  else if(hasC){ s=s.replace(",","."); }
+  const f=parseFloat(s);
+  if(isNaN(f)) return null;
+  return neg? -Math.round(f*100): Math.round(f*100);
+}
+function parseFecha(v){
+  if(v==null||v==="") return null;
+  if(v instanceof Date) return v;
+  if(typeof v==="number"){ // serial de Excel
+    const d=new Date(Math.round((v-25569)*86400*1000)); return isNaN(d)?null:d;
+  }
+  const s=String(v).trim();
+  let m=s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);
+  if(m){let[_,d,mo,y]=m; if(y.length===2)y="20"+y; return new Date(+y,+mo-1,+d);}
+  m=s.match(/^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})$/);
+  if(m){let[_,y,mo,d]=m; return new Date(+y,+mo-1,+d);}
+  const d=new Date(s); return isNaN(d)?null:d;
+}
+function dayDist(a,b){
+  if(!a||!b) return 9999;
+  return Math.abs(Math.round((a-b)/86400000));
+}
+function fmtEUR(cents){
+  return (cents/100).toLocaleString("pt-PT",{minimumFractionDigits:2,maximumFractionDigits:2})+" €";
+}
+function* combos(n,r){
+  const idx=Array.from({length:r},(_,i)=>i);
+  if(r>n) return;
+  while(true){
+    yield idx.slice();
+    let i=r-1;
+    while(i>=0 && idx[i]===i+n-r) i--;
+    if(i<0) return;
+    idx[i]++;
+    for(let j=i+1;j<r;j++) idx[j]=idx[j-1]+1;
+  }
+}
+
+// ---------------- motor de conciliação ----------------
+function conciliar(filas, cfg){
+  const tol=cfg.tol, maxG=cfg.maxG, maxCand=cfg.maxCand||40;
+  const pend=new Map();
+  for(const f of filas){ if(f.valor!=null && f.valor!==0) pend.set(f.row,f); }
+  const grupos=[]; let gid=0;
+
+  // Fase 1: 1:1 global por importe oposto + data mais próxima
+  const activas=[...pend.values()].sort((a,b)=>a.row-b.row);
+  const pares=[];
+  for(let i=0;i<activas.length;i++)for(let j=i+1;j<activas.length;j++){
+    const a=activas[i],b=activas[j];
+    if(Math.abs(a.valor+b.valor)<=tol && (a.valor>0)!==(b.valor>0))
+      pares.push([dayDist(a.fecha,b.fecha),a.row,b.row]);
+  }
+  pares.sort((p,q)=>p[0]-q[0]||p[1]-q[1]||p[2]-q[2]);
+  for(const [d,ra,rb] of pares){
+    if(pend.has(ra)&&pend.has(rb)){
+      gid++; grupos.push({id:gid,rows:[ra,rb],tipo:"fatura+pagamento (1:1)"});
+      pend.delete(ra); pend.delete(rb);
+    }
+  }
+
+  // Fase 2: subconjunto que soma zero (um pagamento salda várias faturas)
+  const restantes=[...pend.keys()].sort((x,y)=>Math.abs(pend.get(y).valor)-Math.abs(pend.get(x).valor));
+  for(const row of restantes){
+    if(!pend.has(row)) continue;
+    const ancla=pend.get(row), objetivo=-ancla.valor;
+    let cands=[...pend.values()].filter(g=>g.row!==row && (g.valor>0)!==(ancla.valor>0))
+      .map(g=>({row:g.row,valor:g.valor,dist:dayDist(g.fecha,ancla.fecha)}));
+    cands.sort((a,b)=>a.dist-b.dist);
+    cands=cands.slice(0,maxCand);
+    const combo=mejorSub(cands,objetivo,tol,maxG-1);
+    if(combo){
+      gid++; grupos.push({id:gid,rows:[row,...combo],tipo:"pagamento de várias faturas"});
+      for(const m of [row,...combo]) pend.delete(m);
+    }
+  }
+
+  // atribuição + numeração de referências por ordem de aparição
+  const asign=new Map();
+  for(const f of filas) asign.set(f.row,{conc:false,ref:"SEM IDENTIFICAR",grupo:null});
+  grupos.sort((a,b)=>Math.min(...a.rows)-Math.min(...b.rows));
+  grupos.forEach((g,i)=>{
+    const ref="Referência "+String(i+1).padStart(3,"0");
+    g.ref=ref;
+    for(const m of g.rows) asign.set(m,{conc:true,ref:ref,grupo:i+1});
+  });
+
+  const total=filas.length;
+  const ok=[...asign.values()].filter(a=>a.conc).length;
+  let saldo=0; for(const f of filas){ if(f.valor && !asign.get(f.row).conc) saldo+=f.valor; }
+  return {asign,grupos,resumen:{total,ok,no:total-ok,grupos:grupos.length,saldo}};
+}
+function mejorSub(cands,objetivo,tol,maxN){
+  const n=cands.length; maxN=Math.min(maxN,n);
+  for(let r=1;r<=maxN;r++){
+    let best=null,bestDist=Infinity;
+    for(const c of combos(n,r)){
+      let s=0,dist=0; for(const i of c){s+=cands[i].valor;dist+=cands[i].dist;}
+      if(Math.abs(s-objetivo)<=tol && dist<bestDist){best=c.map(i=>cands[i].row);bestDist=dist;}
+    }
+    if(best) return best;
+  }
+  return null;
+}
+
+// ---------------- integração com o Excel ----------------
+let LAST=null; // {wb, aoa, headerRow, ci_valor, ci_fecha, headers, sheetName, resultado, filename}
+
+function findHeaderRow(aoa){
+  for(let r=0;r<Math.min(15,aoa.length);r++){
+    const hdr=aoa[r]||[];
+    const cv=detectar(hdr,ALIAS_VALOR,"DEB_CRED"), cf=detectar(hdr,ALIAS_FECHA,"DATA_CERTA");
+    if(cv&&cf) return {r,hdr,cv,cf};
+  }
+  const hdr=aoa[0]||[];
+  return {r:0,hdr,cv:detectar(hdr,ALIAS_VALOR,"DEB_CRED"),cf:detectar(hdr,ALIAS_FECHA,"DATA_CERTA")};
+}
+
+function procesar(wb, filename){
+  const sheetName=wb.SheetNames[0];
+  const ws=wb.Sheets[sheetName];
+  const aoa=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,cellDates:true,defval:null});
+  const {r:headerRow,hdr,cv,cf}=findHeaderRow(aoa);
+  if(!cv){ alert("Não encontrei a coluna de importes 'DEB_CRED'. Verifica o cabeçalho do Excel."); return; }
+  const ci_valor=hdr.indexOf(cv), ci_fecha=cf?hdr.indexOf(cf):-1;
+
+  const filas=[];
+  for(let r=headerRow+1;r<aoa.length;r++){
+    const rowArr=aoa[r]||[];
+    if(rowArr.every(c=>c==null||c==="")) continue;
+    filas.push({row:r, valor:toCents(rowArr[ci_valor]), fecha:ci_fecha>=0?parseFecha(rowArr[ci_fecha]):null});
+  }
+  const cfg={tol:+document.getElementById("tol").value, maxG:+document.getElementById("maxg").value, maxCand:40};
+  const resultado=conciliar(filas,cfg);
+  LAST={wb,aoa,headerRow,ci_valor,ci_fecha,headers:hdr,sheetName,resultado,cv,cf,filename};
+  render();
+}
+
+function render(){
+  const {aoa,headerRow,headers,resultado,cv,cf}=LAST;
+  document.getElementById("results").classList.remove("hidden");
+  document.getElementById("detected").innerHTML=
+    `Colunas detetadas — importes: <span class="badge">${cv}</span> · data: <span class="badge">${cf||"—"}</span> · cabeçalho na linha ${headerRow+1}`;
+  const R=resultado.resumen;
+  document.getElementById("m-total").textContent=R.total;
+  document.getElementById("m-ok").textContent=R.ok;
+  document.getElementById("m-no").textContent=R.no;
+  document.getElementById("m-saldo").textContent=fmtEUR(R.saldo);
+
+  // tabela principal
+  const cols=headers.map(h=>h==null?"":h);
+  const buildTable=(onlyLoose)=>{
+    let html="<thead><tr>";
+    for(const c of cols) html+=`<th>${c}</th>`;
+    html+="<th>CONCILIADO</th><th>INFORMAÇÃO</th></tr></thead><tbody>";
+    for(let r=headerRow+1;r<aoa.length;r++){
+      const rowArr=aoa[r]; if(!rowArr) continue;
+      if(rowArr.every(c=>c==null||c==="")) continue;
+      const a=resultado.asign.get(r); if(!a) continue;
+      if(onlyLoose && a.conc) continue;
+      html+=`<tr class="${a.conc?"ok":"no"}">`;
+      for(let i=0;i<cols.length;i++){
+        let v=rowArr[i];
+        if(v instanceof Date) v=v.toLocaleDateString("pt-PT");
+        html+=`<td>${v==null?"":v}</td>`;
+      }
+      html+=`<td><span class="pill ${a.conc?"ok":"no"}">${a.conc?"VERDADEIRO":"FALSO"}</span></td>`;
+      html+=`<td class="ref">${a.ref}</td></tr>`;
+    }
+    return html+"</tbody>";
+  };
+  document.getElementById("tbl").innerHTML=buildTable(false);
+  document.getElementById("tbl-loose").innerHTML=buildTable(true);
+
+  // grupos
+  let g="";
+  for(const grp of resultado.grupos){
+    g+=`<div class="grp"><div class="h">${grp.ref}</div>
+        <div class="muted">${grp.tipo} · linhas Excel ${grp.rows.map(x=>x+1).join(", ")}</div></div>`;
+  }
+  if(!resultado.grupos.length) g=`<div class="muted">Sem grupos conciliados.</div>`;
+  document.getElementById("view-groups").innerHTML=g;
+}
+
+function descargar(){
+  const {wb,aoa,headerRow,headers,resultado,sheetName,filename}=LAST;
+  const out=aoa.map(r=>r?r.slice():[]);
+  const cc=headers.length, ci=headers.length+1;
+  out[headerRow]=out[headerRow]||[];
+  out[headerRow][cc]="CONCILIADO"; out[headerRow][ci]="INFORMAÇÃO";
+  for(let r=headerRow+1;r<out.length;r++){
+    const a=resultado.asign.get(r); if(!a) continue;
+    out[r][cc]=a.conc; out[r][ci]=a.ref;
+  }
+  const ws=XLSX.utils.aoa_to_sheet(out,{cellDates:true});
+  // marcar a coluna CONCILIADO como booleano real
+  const col=XLSX.utils.encode_col(cc);
+  for(let r=headerRow+1;r<out.length;r++){
+    const a=resultado.asign.get(r); if(!a) continue;
+    const ref=col+(r+1);
+    ws[ref]={t:"b",v:!!a.conc};
+  }
+  const nwb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(nwb,ws,sheetName||"Conta Corrente");
+  const base=(filename||"conta_corrente").replace(/\.[^.]+$/,"");
+  XLSX.writeFile(nwb, base+"_CONCILIADO.xlsx");
+}
+
+// ---------------- dados de demonstração ----------------
+function demoWorkbook(){
+  const cols=["Fornecedor","Data Lanç.","DATA_CERTA","Período","Diário","Doc. Interno","Doc. Externo","Descritivo","Descrição","DEBITO","CREDITO","DEB_CRED"];
+  const filas=[
+    ["221110078 - Inquieto Mobily","31-07-2024","31-07-2024",2024071,3,1,"2024-07-31 00005 750001","Nota de Lançamento","09/07 -Inquieto Mobili",992.63,null,992.63],
+    ["221110078 - Inquieto Mobily","31-07-2024","22-07-2024",2024071,56,50,"2024-07-22 00003 730034","Nota de Lançamento","FT 2024/221 Inquieto Mobilidade",null,992.63,-992.63],
+    ["221110078 - Inquieto Mobily","31-08-2024","31-08-2024",2024081,3,1,"2024-08-30 00005 850001","Nota de Lançamento","06/08 -Inquieto",992.63,null,992.63],
+    ["221110078 - Inquieto Mobily","31-08-2024","30-08-2024",2024081,56,43,"2024-08-30 00003 830025","Nota de Lançamento","FT 2024/250 Inquieto Mobilidade",null,2108.04,-2108.04],
+    ["221110078 - Inquieto Mobily","30-09-2024","30-09-2024",2024091,3,1,"2024-09-30 00005 950001","Nota de Lançamento","09/09 -Inquieto",1079.02,null,1079.02],
+    ["221110078 - Inquieto Mobily","30-09-2024","30-09-2024",2024091,3,1,"2024-09-30 00005 950001","Nota de Lançamento","09/09 -Inquieto",1029.02,null,1029.02],
+    ["221110078 - Inquieto Mobily","15-10-2024","10-10-2024",2024101,56,61,"2024-10-10 00003 100061","Nota de Lançamento","FT 2024/300",null,1500.00,-1500.00],
+    ["221110078 - Inquieto Mobily","15-10-2024","12-10-2024",2024101,57,62,"2024-10-12 00004 100062","Nota de Lançamento","NC 2024/030 (nota crédito)",200.00,null,200.00],
+    ["221110078 - Inquieto Mobily","15-10-2024","20-10-2024",2024101,3,5,"2024-10-20 00005 100063","Nota de Lançamento","Pagamento FT300",1300.00,null,1300.00],
+  ];
+  const ws=XLSX.utils.aoa_to_sheet([cols,...filas]);
+  const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,"Conta Corrente");
+  return wb;
+}
+
+// ---------------- eventos ----------------
+const drop=document.getElementById("drop"), file=document.getElementById("file");
+drop.addEventListener("click",()=>file.click());
+drop.addEventListener("dragover",e=>{e.preventDefault();drop.classList.add("hover")});
+drop.addEventListener("dragleave",()=>drop.classList.remove("hover"));
+drop.addEventListener("drop",e=>{e.preventDefault();drop.classList.remove("hover");
+  if(e.dataTransfer.files.length) leerFichero(e.dataTransfer.files[0]);});
+file.addEventListener("change",e=>{ if(e.target.files.length) leerFichero(e.target.files[0]); });
+function leerFichero(f){
+  const reader=new FileReader();
+  reader.onload=ev=>{ const wb=XLSX.read(ev.target.result,{type:"array",cellDates:true}); procesar(wb,f.name); };
+  reader.readAsArrayBuffer(f);
+}
+document.getElementById("demo").addEventListener("click",()=>procesar(demoWorkbook(),"demo_conta_corrente.xlsx"));
+document.getElementById("download").addEventListener("click",descargar);
+document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  t.classList.add("active");
+  const v=t.dataset.t;
+  document.getElementById("view-all").classList.toggle("hidden",v!=="all");
+  document.getElementById("view-loose").classList.toggle("hidden",v!=="loose");
+  document.getElementById("view-groups").classList.toggle("hidden",v!=="groups");
+}));
+[document.getElementById("tol"),document.getElementById("maxg")].forEach(el=>
+  el.addEventListener("change",()=>{ if(LAST) procesar(LAST.wb,LAST.filename); }));
+
+// mostra o exemplo automaticamente ao abrir
+window.addEventListener("load",()=>document.getElementById("demo").click());
+</script>
+</body>
+</html>

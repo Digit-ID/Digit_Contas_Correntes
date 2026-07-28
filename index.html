@@ -209,6 +209,7 @@
           </select>
         </div>
       </div>
+      <button id="reset" class="btn ghost" data-i18n="btnReset">↻ Atualizar dados</button>
       <button id="demo" class="btn ghost" data-i18n="btnDemo">▶ Ver exemplo</button>
     </div>
   </div>
@@ -261,6 +262,7 @@ const ICON={
  sun:_ic('<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>',16),
  cal:_ic('<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>'),
  money:_ic('<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/>'),
+ refresh:_ic('<polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>'),
  alert:_ic('<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>'),
 };
 const I18N={
@@ -271,7 +273,7 @@ const I18N={
   dropMain:"Arrasta ou <b>carrega o teu ficheiro</b> (Excel ou CSV)",
   dropSub:"Aceita .xlsx · .xlsm · .xlsb · .xls · .csv · .ods &nbsp;|&nbsp; precisas das colunas <b>DATA_CERTA</b> e <b>DEB_CRED</b> — vê as <b>Instruções</b>.",
   lblTol:"Tolerância (diferença aceite)", lblMax:"Máx. de linhas combinadas por conciliação",
-  optExact:"Exato (0,00 €)", btnDemo:ICON.play+" Ver exemplo", btnDemoHide:ICON.x+" Ocultar exemplo", btnDownload:ICON.download+" Descarregar Excel conciliado",
+  optExact:"Exato (0,00 €)", btnDemo:ICON.play+" Ver exemplo", btnReset:ICON.refresh+" Atualizar dados", btnDemoHide:ICON.x+" Ocultar exemplo", btnDownload:ICON.download+" Descarregar Excel conciliado",
   mTotal:"Linhas totais", mOk:"Conciliadas <span class='dot g'></span>", mNo:"Soltas <span class='dot o'></span>", mSaldo:"Saldo em aberto",
   tabAll:ICON.list+" Tudo", tabLoose:ICON.xc+" Soltas (saldo)", tabGroups:ICON.link+" Grupos",
   noteLoose:"Estas são as linhas que não casam com nada e compõem o saldo atual da conta.",
@@ -301,7 +303,7 @@ const I18N={
   dropMain:"Drag or <b>upload your file</b> (Excel or CSV)",
   dropSub:"Accepts .xlsx · .xlsm · .xlsb · .xls · .csv · .ods &nbsp;|&nbsp; you need the columns <b>DATA_CERTA</b> and <b>DEB_CRED</b> — see <b>Instructions</b>.",
   lblTol:"Tolerance (accepted difference)", lblMax:"Max. lines combined per reconciliation",
-  optExact:"Exact (0.00 €)", btnDemo:ICON.play+" See example", btnDemoHide:ICON.x+" Hide example", btnDownload:ICON.download+" Download reconciled Excel",
+  optExact:"Exact (0.00 €)", btnDemo:ICON.play+" See example", btnReset:ICON.refresh+" Refresh data", btnDemoHide:ICON.x+" Hide example", btnDownload:ICON.download+" Download reconciled Excel",
   mTotal:"Total lines", mOk:"Reconciled <span class='dot g'></span>", mNo:"Unmatched <span class='dot o'></span>", mSaldo:"Open balance",
   tabAll:ICON.list+" All", tabLoose:ICON.xc+" Unmatched (balance)", tabGroups:ICON.link+" Groups",
   noteLoose:"These are the lines that match nothing and make up the current account balance.",
@@ -331,7 +333,7 @@ const I18N={
   dropMain:"Arrastra o <b>sube tu fichero</b> (Excel o CSV)",
   dropSub:"Acepta .xlsx · .xlsm · .xlsb · .xls · .csv · .ods &nbsp;|&nbsp; necesitas las columnas <b>DATA_CERTA</b> y <b>DEB_CRED</b> — ver <b>Instrucciones</b>.",
   lblTol:"Tolerancia (diferencia aceptada)", lblMax:"Máx. de líneas combinadas por conciliación",
-  optExact:"Exacto (0,00 €)", btnDemo:ICON.play+" Ver ejemplo", btnDemoHide:ICON.x+" Ocultar ejemplo", btnDownload:ICON.download+" Descargar Excel conciliado",
+  optExact:"Exacto (0,00 €)", btnDemo:ICON.play+" Ver ejemplo", btnReset:ICON.refresh+" Refrescar datos", btnDemoHide:ICON.x+" Ocultar ejemplo", btnDownload:ICON.download+" Descargar Excel conciliado",
   mTotal:"Líneas totales", mOk:"Conciliadas <span class='dot g'></span>", mNo:"Sueltas <span class='dot o'></span>", mSaldo:"Saldo abierto",
   tabAll:ICON.list+" Todo", tabLoose:ICON.xc+" Sueltas (saldo)", tabGroups:ICON.link+" Grupos",
   noteLoose:"Estas son las líneas que no casan con nada y componen el saldo actual de la cuenta.",
@@ -854,6 +856,12 @@ async function leerFicheros(lista){
   }
   prog.classList.add("hidden");
 }
+document.getElementById("reset").addEventListener("click",()=>{
+  FILES=[]; CUR=-1;
+  document.getElementById("results").classList.add("hidden");
+  document.getElementById("progress").classList.add("hidden");
+  syncDemoBtn();
+});
 function syncDemoBtn(){
   const btn=document.getElementById("demo");
   btn.dataset.i18n=FILES.some(e=>e.isDemo)?"btnDemoHide":"btnDemo";

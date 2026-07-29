@@ -3,7 +3,51 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Conciliador de Conta Corrente</title>
+<script>try{
+/* Animação de arranque Digit: as letras separam-se e voltam a juntar-se
+   (trabalho em equipa). Não toca no fundo do body para não estragar o tema escuro. */
+var _bg='#f3f6fc';
+var _t0=Date.now(), _MIN=1900;   /* tempo mínimo em ecrã para a animação se ver */
+var CSS='#__boot{position:fixed;inset:0;z-index:2147483000;background:'+_bg+';display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;transition:opacity .45s ease}'
++'#__boot.off{opacity:0;pointer-events:none}'
++'#__boot .sq{width:15px;height:15px;border-radius:2px;background:#12B0F0;animation:bpop .5s cubic-bezier(.2,.9,.3,1.4) both}'
++'#__boot .dg{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-weight:800;font-size:54px;letter-spacing:-2px;color:#1348E8;line-height:1}'
++'#__boot .dg b{display:inline-block;font-weight:800;animation:dEnter .6s cubic-bezier(.2,.9,.3,1.35) both,dTeam 1.7s ease-in-out .62s infinite}'
++'#__boot .tg{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:10px;letter-spacing:4.5px;font-weight:700;color:#9aa4b3;opacity:0;animation:bfade .5s ease .75s both}'
++'#__boot .bar{width:120px;height:3px;border-radius:3px;background:rgba(19,72,232,.12);overflow:hidden;opacity:0;animation:bfade .5s ease .9s both}'
++'#__boot .bar i{display:block;width:38%;height:100%;border-radius:3px;background:#1F6FE0;animation:bslide 1.15s ease-in-out infinite}'
++'@keyframes dEnter{from{opacity:0;transform:translateX(calc(var(--x)*4.5)) scale(.72)}to{opacity:1;transform:translateX(0) scale(1)}}'
++'@keyframes dTeam{0%,100%{transform:translateX(0)}46%{transform:translateX(var(--x))}}'
++'@keyframes bpop{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:scale(1)}}'
++'@keyframes bfade{to{opacity:1}}'
++'@keyframes bslide{0%{transform:translateX(-110%)}100%{transform:translateX(320%)}}';
+var HTML='<div class="sq"></div><div class="dg">'
++'<b style="--x:-26px">d</b><b style="--x:-13px">i</b><b style="--x:0px">g</b>'
++'<b style="--x:13px">i</b><b style="--x:26px">t</b>'
++'</div><div class="tg">BEYOND NUMBERS</div><div class="bar"><i></i></div>';
+window.__bootHTML=HTML;
+function _ensure(){
+  if(window.__bootDone) return;
+  var st=document.getElementById('__bootstyle');
+  if(!st){ st=document.createElement('style'); st.id='__bootstyle'; st.textContent=CSS; (document.head||document.documentElement).appendChild(st); }
+  var d=document.getElementById('__boot');
+  if(!d){ d=document.createElement('div'); d.id='__boot'; d.innerHTML=HTML; document.documentElement.appendChild(d); }
+  else if(d.parentNode!==document.documentElement){ document.documentElement.appendChild(d); }
+}
+_ensure();
+var _iv=setInterval(function(){ if(window.__bootDone){ clearInterval(_iv); return; } _ensure(); },50);
+try{ new MutationObserver(function(){ _ensure(); }).observe(document.documentElement,{childList:true}); }catch(e){}
+setTimeout(function(){ if(window.__hideBoot) window.__hideBoot(); },15000);
+window.__hideBoot=function(){
+  if(window.__bootDone) return;
+  var falta=_MIN-(Date.now()-_t0);
+  if(falta>0){ setTimeout(window.__hideBoot,falta); return; }   /* espera o mínimo */
+  window.__bootDone=1; clearInterval(_iv);
+  var d=document.getElementById('__boot'); if(!d) return;
+  d.className='off'; setTimeout(function(){ if(d.parentNode) d.parentNode.removeChild(d); },500);
+};
+}catch(e){}</script>
+<title>Conciliador de Contas</title>
 <link rel="icon" type="image/png" href="data:image/png;base64,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">
 <link rel="apple-touch-icon" href="data:image/png;base64,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">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -56,18 +100,26 @@
   .drop b{color:var(--brand)}
   .drop .sub{font-size:12px;color:var(--muted);margin-top:6px}
   .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-  .btn{background:var(--brand);color:#fff;border:none;border-radius:10px;padding:10px 16px;
+  .btn{background:var(--brand);color:#fff;border:none;border-radius:10px;padding:0 16px;height:36px;
+    display:inline-flex;align-items:center;gap:7px;
     font-size:13px;font-weight:600;cursor:pointer;transition:.15s}
   .btn:hover{background:var(--brand-dark)}
   .btn.ghost{background:var(--card);color:var(--brand);border:1px solid var(--calloutA-bd)}
   .btn.ghost:hover{background:var(--brand-soft)}
   .btn:disabled{opacity:.5;cursor:not-allowed}
   select{padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--card);font-size:13px;color:var(--ink)}
-  .fld{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--muted);font-weight:600}
+  .fld{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--muted);font-weight:600;cursor:help}
+  .fld-l{display:inline-flex;align-items:center;gap:5px}
+  .info-ic{color:var(--muted);opacity:.65;flex:0 0 auto}
+  .chk{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 12px;border:1px solid var(--line);
+    border-radius:10px;background:var(--card);font-size:12.5px;font-weight:600;color:var(--ink);cursor:pointer}
+  .chk:hover{border-color:var(--brand)}
+  .chk input{accent-color:var(--brand);width:15px;height:15px;cursor:pointer}
   .dd{position:relative}
-  .dd-btn{display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:190px;
-    padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);cursor:pointer;
-    font-size:13px;font-weight:600;color:var(--ink);transition:.15s}
+  .dd-btn{display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:112px;height:36px;
+    padding:0 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);cursor:pointer;
+    font-family:ui-monospace,"JetBrains Mono",Consolas,monospace;font-size:12.5px;font-weight:600;
+    color:var(--ink);transition:.15s}
   .dd-btn:hover{border-color:#c3d3f0}
   .dd-btn .chev{color:#8892a4;font-size:11px;transition:.15s}
   .dd.open .dd-btn{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
@@ -75,7 +127,9 @@
   .dd-menu{position:absolute;top:calc(100% + 6px);left:0;min-width:100%;background:var(--card);border:1px solid var(--line);
     border-radius:12px;box-shadow:0 14px 34px rgba(20,40,90,.16);padding:6px;z-index:30;max-height:250px;overflow:auto}
   .dd-menu.hidden{display:none}
-  .dd-opt{padding:9px 11px;border-radius:8px;font-size:13px;cursor:pointer;display:flex;align-items:center;
+  .dd.dis{opacity:.5;pointer-events:none}
+  .dd-opt{padding:8px 11px;border-radius:8px;font-family:ui-monospace,"JetBrains Mono",Consolas,monospace;
+    font-size:12.5px;font-weight:500;cursor:pointer;display:flex;align-items:center;
     justify-content:space-between;gap:12px;white-space:nowrap;color:var(--ink)}
   .dd-opt:hover{background:var(--brand-soft)}
   .dd-opt.sel{background:var(--brand);color:#fff}
@@ -132,6 +186,8 @@
   .grp .h{font-weight:700;color:var(--brand)}
   .muted{color:var(--muted)}
   .num{text-align:right;font-variant-numeric:tabular-nums}
+  .mono{font-family:ui-monospace,"JetBrains Mono",Consolas,monospace;font-weight:600}
+  td.tnum{text-align:right}
   .hidden{display:none}
   .note{font-size:12px;color:var(--muted);margin-top:10px}
   .badge{background:var(--brand-soft);color:var(--brand);border-radius:7px;padding:3px 8px;font-size:11.5px;font-weight:700}
@@ -151,6 +207,16 @@
   .callout.b{background:var(--calloutB-bg);border-color:var(--calloutB-bd)}
   .callout code{background:#0f172a;color:#e2e8f0;padding:2px 7px;border-radius:6px;font-size:12.5px;font-weight:600}
   .callout .plus{color:var(--ok-ink);font-weight:800}
+  .manual{font-size:12.8px;line-height:1.6}
+  .manual .mh{font-weight:800;font-size:13.5px;margin:20px 0 9px;padding-bottom:6px;
+    border-bottom:1px solid var(--line);letter-spacing:.2px}
+  .manual .mh:first-child{margin-top:0}
+  .manual p{margin:7px 0}
+  .manual ul,.manual ol{margin:7px 0;padding-left:20px}
+  .manual li{margin:5px 0}
+  .manual code{background:#1e2837;color:#eef0f3;padding:2px 6px;border-radius:5px;
+    font-family:ui-monospace,"JetBrains Mono",Consolas,monospace;font-size:11.5px;font-weight:600}
+  .manual .callout{font-size:12.5px}
   .callout .minus{color:var(--no-ink);font-weight:800}
   @media(max-width:640px){.metrics{grid-template-columns:repeat(2,1fr)}}
 </style>
@@ -171,7 +237,7 @@
 
 <div class="wrap">
   <div class="hero">
-    <h1 data-i18n="heroTitle">Conciliador de Conta Corrente</h1>
+    <h1 data-i18n="heroTitle">Conciliador de Contas</h1>
     <p data-i18n="heroText">Carrega o teu Excel e a app encontra as linhas cujo <b>DEB_CRED</b> soma zero
        (fatura + pagamento, notas de crédito, um pagamento de várias faturas) e marca as que ficam soltas.
        Tudo corre no teu navegador — nenhum ficheiro sai do teu computador.</p>
@@ -185,9 +251,25 @@
       <input id="file" type="file" accept=".xlsx,.xlsm,.xlsb,.xls,.csv,.ods" multiple class="hidden">
     </div>
     <div id="progress" class="progress hidden"><span class="spin"></span><span id="progress-txt"></span></div>
-    <div class="row" style="margin-top:12px;justify-content:space-between">
+    <div class="row" style="margin-top:12px;justify-content:space-between;align-items:flex-end">
       <div class="row">
-        <div class="fld" title="Diferença máxima que a app aceita para considerar que um grupo 'soma zero'. Útil para pequenos descuadres por arredondamento ou cêntimos."><span data-i18n="lblTol">Tolerância (diferença aceite)</span>
+        <div class="fld" title="Perfis prontos para relatórios exportados de sistemas de contabilidade: fixam automaticamente o modo e os nomes das colunas.">
+          <span class="fld-l"><span data-i18n="lblPreset">Sistema</span><svg class="info-ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span>
+          <select id="preset">
+            <option value="" data-i18n="presetGen">Genérico</option>
+            <option value="centralgest">CentralGest</option>
+            <option value="bcpt">Business Central PT</option>
+          </select>
+        </div>
+        <div class="fld" title="Onde estão os valores: numa única coluna (positivos = débito, negativos = crédito) ou em duas colunas de débito e crédito (a app faz DÉBITO − CRÉDITO).">
+          <span class="fld-l"><span data-i18n="lblMode">Valores</span><svg class="info-ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span>
+          <select id="mode">
+            <option value="auto" data-i18n="modeAuto">Automático</option>
+            <option value="one" data-i18n="modeOne">1 coluna (DEB_CRED)</option>
+            <option value="two" data-i18n="modeTwo">2 colunas (DEBITO/CREDITO)</option>
+          </select>
+        </div>
+        <div class="fld" title="Diferença máxima que a app aceita para considerar que um grupo 'soma zero'. Útil para pequenos descuadres por arredondamento ou cêntimos."><span class="fld-l"><span data-i18n="lblTol">Tolerância</span><svg class="info-ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span>
           <select id="tol">
             <option value="0" data-i18n="optExact">Exato (0,00 €)</option>
             <option value="1" selected>± 0,01 €</option>
@@ -202,7 +284,7 @@
             <option value="500">± 5,00 €</option>
           </select>
         </div>
-        <div class="fld" title="Quantas linhas (faturas, pagamentos, notas de crédito) a app pode somar em conjunto para dar zero. Ex.: 1 fatura paga com 3 pagamentos = 4 linhas."><span data-i18n="lblMax">Máx. de linhas combinadas por conciliação</span>
+        <div class="fld" title="Quantas linhas (faturas, pagamentos, notas de crédito) a app pode somar em conjunto para dar zero. Ex.: 1 fatura paga com 3 pagamentos = 4 linhas."><span class="fld-l"><span data-i18n="lblMax">Linhas por grupo</span><svg class="info-ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span>
           <select id="maxg">
             <option>2</option><option>3</option><option>4</option><option selected>5</option>
             <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
@@ -211,16 +293,31 @@
           </select>
         </div>
       </div>
-      <button id="reset" class="btn ghost" data-i18n="btnReset">↻ Atualizar dados</button>
-      <button id="demo" class="btn ghost" data-i18n="btnDemo">▶ Ver exemplo</button>
+      <div class="row" style="gap:8px;margin-left:auto">
+        <button id="reset" class="btn ghost" data-i18n="btnReset">↻ Atualizar dados</button>
+        <button id="demo" class="btn ghost" data-i18n="btnDemo">▶ Ver exemplo</button>
+      </div>
     </div>
   </div>
 
   <div id="results" class="hidden">
     <div class="card">
       <div id="filesum" class="muted" style="margin-bottom:10px;font-weight:600"></div>
-      <div class="row" style="justify-content:space-between;margin-bottom:12px">
-        <div id="detected" class="muted"></div>
+      <div id="detected" class="muted" style="margin-bottom:12px"></div>
+      <div class="row" style="justify-content:space-between;align-items:flex-end;margin-bottom:14px">
+        <div class="row" style="gap:14px;align-items:flex-end">
+          <div class="fld" title="Ordem das folhas no ficheiro descarregado.">
+            <span class="fld-l"><span data-i18n="lblSort">Ordenar folhas</span><svg class="info-ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span>
+            <select id="sort">
+              <option value="orig" data-i18n="sortOrig">Ordem original</option>
+              <option value="asc" data-i18n="sortAsc">Crescente (A → Z)</option>
+              <option value="desc" data-i18n="sortDesc">Decrescente (Z → A)</option>
+            </select>
+          </div>
+          <label class="chk" title="Cria uma folha 'Indice' no início com ligações para todas as folhas, e em cada folha uma ligação de volta ao índice na célula A1.">
+            <input type="checkbox" id="opt-index"><span data-i18n="lblIndex">Adicionar folha Índice</span>
+          </label>
+        </div>
         <button id="download" class="btn" data-i18n="btnDownload">⬇️ Descarregar Excel conciliado</button>
       </div>
       <div class="metrics">
@@ -270,11 +367,11 @@ const ICON={
 const I18N={
  pt:{
   btnInstr:ICON.book+" Instruções",
-  heroTitle:"Conciliador de Conta Corrente",
-  heroText:"Carrega o teu Excel e a app encontra as linhas cujo <b>DEB_CRED</b> soma zero (fatura + pagamento, notas de crédito, um pagamento de várias faturas) e marca as que ficam soltas. Tudo corre no teu navegador — nenhum ficheiro sai do teu computador.",
+  heroTitle:"Conciliador de Contas",
+  heroText:"Concilia qualquer conta — clientes, fornecedores, salários de trabalhadores, outras contas a receber e a pagar, impostos e dívidas ao Estado. Carrega o teu Excel e a app encontra as linhas cujo <b>DEB_CRED</b> soma zero (fatura + pagamento, notas de crédito, um pagamento de várias faturas) e marca as que ficam soltas. Tudo corre no teu navegador — nenhum ficheiro sai do teu computador.",
   dropMain:"Arrasta ou <b>carrega o teu ficheiro</b> (Excel ou CSV)",
   dropSub:"Aceita .xlsx · .xlsm · .xlsb · .xls · .csv · .ods &nbsp;|&nbsp; precisas das colunas <b>DATA_CERTA</b> e <b>DEB_CRED</b> — vê as <b>Instruções</b>.",
-  lblTol:"Tolerância (diferença aceite)", lblMax:"Máx. de linhas combinadas por conciliação",
+  lblTol:"Tolerância", lblMax:"Linhas por grupo",
   optExact:"Exato (0,00 €)", btnDemo:ICON.play+" Ver exemplo", btnReset:ICON.refresh+" Atualizar dados", btnDemoHide:ICON.x+" Ocultar exemplo", btnDownload:ICON.download+" Descarregar Excel conciliado",
   mTotal:"Linhas totais", mOk:"Conciliadas <span class='dot g'></span>", mNo:"Soltas <span class='dot o'></span>", mSaldo:"Saldo em aberto",
   tabAll:ICON.list+" Tudo", tabLoose:ICON.xc+" Soltas (saldo)", tabGroups:ICON.link+" Grupos",
@@ -282,12 +379,83 @@ const I18N={
   noteBool:"A coluna <b>CONCILIADO</b> sai como VERDADEIRO/FALSO. No Excel podes selecioná-la e usar <b>Inserir → Caixa de verificação</b> para a tornar clicável.",
   modalTitle:ICON.book+" Instruções",
   step1:"<b>Carrega ou arrasta</b> o teu ficheiro para a área indicada. Formatos aceites: <b>.xlsx</b>, <b>.xlsm</b>, <b>.xlsb</b>, <b>.xls</b> (97-2003), <b>.csv</b> e <b>.ods</b>.",
-  step2:"Para funcionar, o teu Excel tem de cumprir <b>dois requisitos</b> nas colunas:",
+  step2:"Se o teu ficheiro vem de um sistema de contabilidade, escolhe-o no seletor <b>Sistema</b> (<b>CentralGest</b> ou <b>Business Central PT</b>) e a app assume sozinha os nomes das colunas. Em <b>Genérico</b>, o teu Excel tem de cumprir <b>dois requisitos</b>:",
   calloutA:ICON.cal+" A coluna das <b>datas</b> tem de se chamar exatamente <code>DATA_CERTA</code>.<div class='muted' style='margin-top:6px'>A ordem das colunas pode ser qualquer — a app procura-a pelo nome.</div>",
-  calloutB:ICON.money+" Tem de existir <b>uma única coluna</b> chamada <code>DEB_CRED</code> com todos os valores:<div style='margin-top:8px'>• valores a <b>débito</b> com sinal <span class='plus'>positivo (+)</span> &nbsp;→&nbsp; ex.: <b>992,63</b><br>• valores a <b>crédito</b> com sinal <span class='minus'>negativo (−)</span> &nbsp;→&nbsp; ex.: <b>−992,63</b></div>",
+  calloutB:ICON.money+" Os valores podem vir de <b>duas formas</b> (escolhes no seletor <b>Valores</b>):<div style='margin-top:8px'><b>A) Uma coluna</b> <code>DEB_CRED</code> com tudo:<br>• <b>débito</b> com sinal <span class='plus'>positivo (+)</span> &nbsp;→&nbsp; ex.: <b>992,63</b><br>• <b>crédito</b> com sinal <span class='minus'>negativo (−)</span> &nbsp;→&nbsp; ex.: <b>−992,63</b></div><div style='margin-top:8px'><b>B) Duas colunas</b> <code>DEBITO</code> e <code>CREDITO</code>, ambas com os valores em positivo — a app calcula <b>DEBITO − CREDITO</b> (débitos +, créditos −).</div>",
   step3:"A app procura as linhas cujo <b>DEB_CRED soma zero</b> e marca-as como conciliadas. As que não casam ficam <b>SEM IDENTIFICAR</b> e formam o saldo em aberto.",
   step4:"Descarrega o <b>Excel conciliado</b>, já com as colunas <b>CONCILIADO</b> (VERDADEIRO/FALSO) e <b>INFORMAÇÃO</b> (Referência 001, 002…).",
   step5:"Podes carregar <b>vários ficheiros de uma vez</b> — a descarga junta tudo num só Excel, com <b>uma folha por ficheiro</b>. O que conta é o <b>total de linhas</b>: até <b>~20.000 linhas</b> somadas é imediato; até <b>~50.000</b> funciona com uma espera de alguns segundos.",
+  manual:`<div class="manual">
+<div class="mh">1 · Como usar</div>
+<ol>
+<li>Escolhe o teu <b>Sistema</b> de contabilidade (ou deixa em <b>Genérico</b>).</li>
+<li><b>Arrasta ou carrega</b> um ou vários ficheiros. Aceita <b>.xlsx</b>, <b>.xlsm</b>, <b>.xlsb</b>, <b>.xls</b> (97-2003), <b>.csv</b> e <b>.ods</b>.</li>
+<li>A app lê <b>todas as folhas</b> de cada ficheiro e concilia cada uma.</li>
+<li>Revê o resultado nos separadores e <b>descarrega o Excel conciliado</b>.</li>
+</ol>
+
+<div class="mh">2 · O que a app procura</div>
+<p>Procura as linhas cujos valores <b>somam zero</b>, porque isso significa que já estão saldadas:</p>
+<ul>
+<li>uma <b>fatura</b> com o seu <b>pagamento</b>;</li>
+<li>uma fatura paga em <b>vários pagamentos</b>;</li>
+<li>um <b>pagamento que salda várias faturas</b>;</li>
+<li>grupos com <b>notas de crédito</b>, adiantamentos ou transferências.</li>
+</ul>
+<p>Cada grupo recebe uma referência (<b>Referência 001</b>, <b>002</b>…). O que não casa com nada fica <b>SEM IDENTIFICAR</b> — e é exatamente isso que compõe o <b>saldo em aberto</b> da conta nesse momento.</p>
+
+<div class="mh">3 · Sistemas de contabilidade</div>
+<p>Se o ficheiro vem de um sistema conhecido, escolhe-o e a app assume sozinha os nomes das colunas:</p>
+<ul>
+<li><b>CentralGest</b> — concilia sempre a <b>duas colunas</b>: <code>Débito</code>, <code>Crédito</code> e data em <code>Data Doc. Externo</code>.</li>
+<li><b>Business Central PT</b> — concilia sempre a <b>uma coluna</b>: <code>Valor</code> e data em <code>Data Registo</code>.</li>
+<li><b>Genérico</b> — deteção automática; és tu que escolhes em <b>Valores</b>.</li>
+</ul>
+
+<div class="mh">4 · As colunas (modo Genérico)</div>
+<div class="callout a">📅 A coluna das <b>datas</b> deve chamar-se <code>DATA_CERTA</code>. A ordem das colunas é indiferente — a app procura-as pelo nome.</div>
+<div class="callout b">💶 Os valores podem vir de <b>duas formas</b>:
+<div style="margin-top:8px"><b>A) Uma coluna</b> <code>DEB_CRED</code> com tudo:<br>
+• <b>débito</b> em <span class="plus">positivo (+)</span> → ex.: <b>992,63</b><br>
+• <b>crédito</b> em <span class="minus">negativo (−)</span> → ex.: <b>−992,63</b></div>
+<div style="margin-top:8px"><b>B) Duas colunas</b> <code>DEBITO</code> e <code>CREDITO</code>, ambas com valores em positivo — a app calcula <b>DEBITO − CREDITO</b>.</div></div>
+<p class="muted">Folhas sem estas colunas não são conciliadas, mas vão na mesma para o ficheiro final.</p>
+
+<div class="mh">5 · Opções</div>
+<ul>
+<li><b>Tolerância</b> — diferença máxima aceite para considerar que um grupo soma zero (de <b>exato</b> até <b>± 5 €</b>). Serve para arredondamentos e descontos de cêntimos. Quanto maior, mais encontra… mas mais risco de juntar linhas sem relação.</li>
+<li><b>Linhas por grupo</b> — quantas linhas pode somar em conjunto (até <b>20</b>). Ex.: 1 fatura paga com 3 pagamentos = 4 linhas.</li>
+<li><b>Ordenar folhas</b> — ordem original, crescente (A→Z) ou decrescente (Z→A) no ficheiro final.</li>
+<li><b>Folha Índice</b> — cria uma folha <b>Indice</b> no início com ligações para todas as folhas (e as suas estatísticas). Em cada folha, a célula <b>A1</b> leva-te de volta ao índice.</li>
+<li><b>Atualizar dados</b> — limpa tudo e deixa a app pronta para uma nova carga.</li>
+</ul>
+
+<div class="mh">6 · Vários ficheiros de uma vez</div>
+<p>Podes carregar <b>vários ficheiros</b> ao mesmo tempo: se um tiver 20 folhas e outros dois tiverem 1 folha cada, o ficheiro final terá <b>22 folhas</b>. Cada folha aparece num separador em baixo — passa o rato para veres as estatísticas de cada uma.</p>
+<p>O que pesa é o <b>total de linhas</b>: até cerca de <b>20.000 linhas</b> somadas é imediato; até <b>50.000</b> funciona com uma espera de alguns segundos.</p>
+
+<div class="mh">7 · O ficheiro que descarregas</div>
+<p>É o teu Excel original com <b>duas colunas novas</b> à direita:</p>
+<ul>
+<li><b>CONCILIADO</b> — VERDADEIRO ou FALSO. No Excel podes selecionar a coluna e usar <b>Inserir → Caixa de verificação</b> para a tornar clicável.</li>
+<li><b>INFORMAÇÃO</b> — a referência do grupo, ou <b>SEM IDENTIFICAR</b>.</li>
+</ul>
+
+<div class="mh">8 · Segurança e privacidade dos teus dados</div>
+<p>Esta aplicação foi pensada para trabalhar com <b>informação sensível</b>, por isso funciona de forma diferente da maioria das apps online:</p>
+<div class="callout a">
+<b>Nada é enviado para a internet.</b> Quando arrastas um ficheiro, ele <b>não é carregado para nenhum servidor</b>. O Excel é aberto, lido e processado <b>dentro do teu próprio navegador</b>, na tua máquina. A app nem sequer tem código para enviar ficheiros — e o código é público, pode ser verificado.
+</div>
+<ul>
+<li><b>Nada fica guardado.</b> Os dados existem apenas na <b>memória temporária do separador</b> enquanto o tens aberto. A app não escreve nada em cookies nem na memória do navegador. Fechas o separador e desaparece tudo; o botão <b>Atualizar dados</b> limpa na hora.</li>
+<li><b>Não há contas, nem registos, nem base de dados.</b> Ninguém fica a saber que ficheiros abriste — não existe histórico do lado do site.</li>
+<li><b>O único ficheiro que fica</b> é o que <b>tu</b> descarregas, na tua pasta de transferências: na tua máquina e sob o teu controlo.</li>
+<li><b>Queres ainda mais garantias?</b> Abre a app numa <b>janela anónima/privada</b>: ao fechá-la o navegador não guarda absolutamente nada, nem sequer a cópia da própria página.</li>
+<li><b>Limpar o histórico e a cache</b> apaga a cópia guardada da <b>página</b> — nunca os teus dados, porque esses nunca chegaram a ser guardados em lado nenhum.</li>
+<li><b>Ligação segura (HTTPS)</b> entre o navegador e o site, usada apenas para carregar a própria aplicação.</li>
+</ul>
+<p class="muted">Nota técnica: a página carrega duas bibliotecas públicas (SheetJS e ExcelJS) para ler e escrever Excel. São ficheiros de <b>código que vêm</b> para o teu navegador — o percurso é sempre nesse sentido; os teus dados nunca fazem o caminho inverso.</p>
+</div>`,
   modalOk:"Percebi",
   detected:"Colunas detetadas — importes: {v} · data: {f} · cabeçalho na linha {r}",
   warnBig:ICON.alert+" ficheiro muito grande: algumas conciliações complexas podem não ter sido procuradas",
@@ -296,15 +464,20 @@ const I18N={
   grpRows:"linhas Excel", grpEmpty:"Sem grupos conciliados.",
   pillTrue:"VERDADEIRO", pillFalse:"FALSO",
   processing:"A processar {i}/{n}",
-  filesSum:ICON.file+" {n} ficheiro(s) carregado(s) · {l} linhas no total",
+  filesSum:ICON.file+" {n} ficheiro(s) · {s} folha(s) · {l} linhas no total",
+  noRecon:"Folha sem coluna DEB_CRED nem DEBITO/CREDITO — vai na mesma para o ficheiro final, sem conciliação.",
+  lblSort:"Ordenar folhas", sortOrig:"Ordem original", sortAsc:"Crescente (A → Z)", sortDesc:"Decrescente (Z → A)",
+  lblMode:"Valores", modeAuto:"Automático", modeOne:"1 coluna (DEB_CRED)", modeTwo:"2 colunas (DEBITO/CREDITO)",
+  lblPreset:"Sistema", presetGen:"Genérico",
+  lblIndex:"Adicionar folha Índice",
  },
  en:{
   btnInstr:ICON.book+" Instructions",
-  heroTitle:"Supplier Account Reconciliation",
-  heroText:"Upload your Excel and the app finds the lines whose <b>DEB_CRED</b> sums to zero (invoice + payment, credit notes, one payment settling several invoices) and flags the unmatched ones. Everything runs in your browser — no file ever leaves your computer.",
+  heroTitle:"Account Reconciler",
+  heroText:"Reconcile any account — customers, suppliers, employee salaries, other receivables and payables, taxes and government debts. Upload your Excel and the app finds the lines whose <b>DEB_CRED</b> sums to zero (invoice + payment, credit notes, one payment settling several invoices) and flags the unmatched ones. Everything runs in your browser — no file ever leaves your computer.",
   dropMain:"Drag or <b>upload your file</b> (Excel or CSV)",
   dropSub:"Accepts .xlsx · .xlsm · .xlsb · .xls · .csv · .ods &nbsp;|&nbsp; you need the columns <b>DATA_CERTA</b> and <b>DEB_CRED</b> — see <b>Instructions</b>.",
-  lblTol:"Tolerance (accepted difference)", lblMax:"Max. lines combined per reconciliation",
+  lblTol:"Tolerance", lblMax:"Lines per group",
   optExact:"Exact (0.00 €)", btnDemo:ICON.play+" See example", btnReset:ICON.refresh+" Refresh data", btnDemoHide:ICON.x+" Hide example", btnDownload:ICON.download+" Download reconciled Excel",
   mTotal:"Total lines", mOk:"Reconciled <span class='dot g'></span>", mNo:"Unmatched <span class='dot o'></span>", mSaldo:"Open balance",
   tabAll:ICON.list+" All", tabLoose:ICON.xc+" Unmatched (balance)", tabGroups:ICON.link+" Groups",
@@ -312,12 +485,83 @@ const I18N={
   noteBool:"The <b>CONCILIADO</b> column comes as TRUE/FALSE. In Excel you can select it and use <b>Insert → Checkbox</b> to make it clickable.",
   modalTitle:ICON.book+" Instructions",
   step1:"<b>Upload or drag</b> your file to the indicated area. Accepted formats: <b>.xlsx</b>, <b>.xlsm</b>, <b>.xlsb</b>, <b>.xls</b> (97-2003), <b>.csv</b> and <b>.ods</b>.",
-  step2:"For it to work, your Excel must meet <b>two column requirements</b>:",
+  step2:"If your file comes from an accounting system, pick it in the <b>System</b> selector (<b>CentralGest</b> or <b>Business Central PT</b>) and the app assumes the column names for you. In <b>Generic</b> mode, your Excel must meet <b>two column requirements</b>:",
   calloutA:ICON.cal+" The <b>date</b> column must be named exactly <code>DATA_CERTA</code>.<div class='muted' style='margin-top:6px'>Column order doesn't matter — the app finds it by name.</div>",
-  calloutB:ICON.money+" There must be <b>a single column</b> named <code>DEB_CRED</code> with all the values:<div style='margin-top:8px'>• <b>debit</b> amounts with a <span class='plus'>positive (+)</span> sign &nbsp;→&nbsp; e.g. <b>992.63</b><br>• <b>credit</b> amounts with a <span class='minus'>negative (−)</span> sign &nbsp;→&nbsp; e.g. <b>−992.63</b></div>",
+  calloutB:ICON.money+" Amounts can come in <b>two ways</b> (pick it in the <b>Amounts</b> selector):<div style='margin-top:8px'><b>A) One column</b> <code>DEB_CRED</code> with everything:<br>• <b>debit</b> with a <span class='plus'>positive (+)</span> sign &nbsp;→&nbsp; e.g. <b>992.63</b><br>• <b>credit</b> with a <span class='minus'>negative (−)</span> sign &nbsp;→&nbsp; e.g. <b>−992.63</b></div><div style='margin-top:8px'><b>B) Two columns</b> <code>DEBITO</code> and <code>CREDITO</code>, both with positive values — the app computes <b>DEBITO − CREDITO</b> (debits +, credits −).</div>",
   step3:"The app searches for lines whose <b>DEB_CRED sums to zero</b> and marks them as reconciled. Those that don't match stay as <b>SEM IDENTIFICAR</b> and form the open balance.",
   step4:"Download the <b>reconciled Excel</b>, with the <b>CONCILIADO</b> (TRUE/FALSE) and <b>INFORMAÇÃO</b> (Referência 001, 002…) columns added.",
   step5:"You can load <b>several files at once</b> — the download merges everything into a single Excel with <b>one sheet per file</b>. What matters is the <b>total number of lines</b>: up to <b>~20,000 lines</b> combined is instant; up to <b>~50,000</b> works with a few seconds' wait.",
+  manual:`<div class="manual">
+<div class="mh">1 · How to use it</div>
+<ol>
+<li>Pick your accounting <b>System</b> (or leave it on <b>Generic</b>).</li>
+<li><b>Drag or upload</b> one or more files. Accepts <b>.xlsx</b>, <b>.xlsm</b>, <b>.xlsb</b>, <b>.xls</b> (97-2003), <b>.csv</b> and <b>.ods</b>.</li>
+<li>The app reads <b>every sheet</b> in each file and reconciles them all.</li>
+<li>Review the result in the tabs and <b>download the reconciled Excel</b>.</li>
+</ol>
+
+<div class="mh">2 · What the app looks for</div>
+<p>It finds the lines whose amounts <b>sum to zero</b>, because that means they are already settled:</p>
+<ul>
+<li>an <b>invoice</b> with its <b>payment</b>;</li>
+<li>an invoice settled by <b>several payments</b>;</li>
+<li>one <b>payment settling several invoices</b>;</li>
+<li>groups including <b>credit notes</b>, advances or transfers.</li>
+</ul>
+<p>Each group gets a reference (<b>Referência 001</b>, <b>002</b>…). Whatever does not match stays <b>SEM IDENTIFICAR</b> (unmatched) — and that is exactly what makes up the account's <b>open balance</b>.</p>
+
+<div class="mh">3 · Accounting systems</div>
+<p>If the file comes from a known system, pick it and the app assumes the column names for you:</p>
+<ul>
+<li><b>CentralGest</b> — always <b>two columns</b>: <code>Débito</code>, <code>Crédito</code>, date in <code>Data Doc. Externo</code>.</li>
+<li><b>Business Central PT</b> — always <b>one column</b>: <code>Valor</code>, date in <code>Data Registo</code>.</li>
+<li><b>Generic</b> — automatic detection; you choose in <b>Amounts</b>.</li>
+</ul>
+
+<div class="mh">4 · The columns (Generic mode)</div>
+<div class="callout a">📅 The <b>date</b> column must be named <code>DATA_CERTA</code>. Column order does not matter — the app finds them by name.</div>
+<div class="callout b">💶 Amounts can come in <b>two ways</b>:
+<div style="margin-top:8px"><b>A) One column</b> <code>DEB_CRED</code> with everything:<br>
+• <b>debit</b> as <span class="plus">positive (+)</span> → e.g. <b>992.63</b><br>
+• <b>credit</b> as <span class="minus">negative (−)</span> → e.g. <b>−992.63</b></div>
+<div style="margin-top:8px"><b>B) Two columns</b> <code>DEBITO</code> and <code>CREDITO</code>, both positive — the app computes <b>DEBITO − CREDITO</b>.</div></div>
+<p class="muted">Sheets without these columns are not reconciled, but are still included in the final file.</p>
+
+<div class="mh">5 · Options</div>
+<ul>
+<li><b>Tolerance</b> — maximum accepted difference for a group to count as zero (from <b>exact</b> up to <b>± 5 €</b>). Useful for rounding and cent differences. The higher it is, the more it finds… but the higher the risk of grouping unrelated lines.</li>
+<li><b>Lines per group</b> — how many lines can be added together (up to <b>20</b>). E.g. 1 invoice paid with 3 payments = 4 lines.</li>
+<li><b>Sort sheets</b> — original order, ascending (A→Z) or descending (Z→A) in the final file.</li>
+<li><b>Index sheet</b> — creates an <b>Indice</b> sheet at the front linking to every sheet (with its stats). In each sheet, cell <b>A1</b> takes you back to the index.</li>
+<li><b>Refresh data</b> — clears everything, ready for a new upload.</li>
+</ul>
+
+<div class="mh">6 · Several files at once</div>
+<p>You can load <b>several files</b> at the same time: if one has 20 sheets and two others have 1 sheet each, the final file will have <b>22 sheets</b>. Each sheet appears as a tab at the bottom — hover it to see its stats.</p>
+<p>What matters is the <b>total number of lines</b>: up to around <b>20,000 lines</b> combined is instant; up to <b>50,000</b> works with a few seconds' wait.</p>
+
+<div class="mh">7 · The file you download</div>
+<p>It is your original Excel with <b>two new columns</b> on the right:</p>
+<ul>
+<li><b>CONCILIADO</b> — TRUE or FALSE. In Excel you can select the column and use <b>Insert → Checkbox</b> to make it clickable.</li>
+<li><b>INFORMAÇÃO</b> — the group reference, or <b>SEM IDENTIFICAR</b>.</li>
+</ul>
+
+<div class="mh">8 · Security and privacy of your data</div>
+<p>This application was designed to work with <b>sensitive information</b>, so it works differently from most online apps:</p>
+<div class="callout a">
+<b>Nothing is sent over the internet.</b> When you drag a file in, it is <b>not uploaded to any server</b>. The Excel is opened, read and processed <b>inside your own browser</b>, on your machine. The app does not even contain code to send files — and the code is public, so it can be verified.
+</div>
+<ul>
+<li><b>Nothing is stored.</b> Your data only exists in the <b>tab's temporary memory</b> while it is open. The app writes nothing to cookies or browser storage. Close the tab and it is all gone; the <b>Refresh data</b> button clears it instantly.</li>
+<li><b>No accounts, no logs, no database.</b> Nobody learns which files you opened — there is no history on the site's side.</li>
+<li><b>The only file that remains</b> is the one <b>you</b> download, in your Downloads folder: on your machine and under your control.</li>
+<li><b>Want extra peace of mind?</b> Open the app in a <b>private/incognito window</b>: when you close it, the browser keeps absolutely nothing, not even a copy of the page itself.</li>
+<li><b>Clearing history and cache</b> removes the stored copy of the <b>page</b> — never your data, because your data was never stored anywhere.</li>
+<li><b>Secure connection (HTTPS)</b> between your browser and the site, used only to load the application itself.</li>
+</ul>
+<p class="muted">Technical note: the page loads two public libraries (SheetJS and ExcelJS) to read and write Excel. Those are <b>code files coming in</b> to your browser — the traffic only goes that way; your data never travels back.</p>
+</div>`,
   modalOk:"Got it",
   detected:"Detected columns — amounts: {v} · date: {f} · header on row {r}",
   warnBig:ICON.alert+" very large file: some complex reconciliations may not have been searched",
@@ -326,15 +570,20 @@ const I18N={
   grpRows:"Excel rows", grpEmpty:"No reconciled groups.",
   pillTrue:"TRUE", pillFalse:"FALSE",
   processing:"Processing {i}/{n}",
-  filesSum:ICON.file+" {n} file(s) loaded · {l} lines in total",
+  filesSum:ICON.file+" {n} file(s) · {s} sheet(s) · {l} lines in total",
+  noRecon:"Sheet without DEB_CRED or DEBITO/CREDITO columns — still included in the final file, without reconciliation.",
+  lblSort:"Sort sheets", sortOrig:"Original order", sortAsc:"Ascending (A → Z)", sortDesc:"Descending (Z → A)",
+  lblMode:"Amounts", modeAuto:"Automatic", modeOne:"1 column (DEB_CRED)", modeTwo:"2 columns (DEBITO/CREDITO)",
+  lblPreset:"System", presetGen:"Generic",
+  lblIndex:"Add Index sheet",
  },
  es:{
   btnInstr:ICON.book+" Instrucciones",
-  heroTitle:"Conciliador de Cuenta Corriente",
-  heroText:"Sube tu Excel y la app encuentra las líneas cuyo <b>DEB_CRED</b> suma cero (factura + pago, notas de crédito, un pago que salda varias facturas) y marca las que quedan sueltas. Todo corre en tu navegador — ningún fichero sale de tu ordenador.",
+  heroTitle:"Conciliador de Cuentas",
+  heroText:"Concilia cualquier cuenta — clientes, proveedores, salarios de trabajadores, otras cuentas por cobrar y por pagar, impuestos y deudas con el Estado. Sube tu Excel y la app encuentra las líneas cuyo <b>DEB_CRED</b> suma cero (factura + pago, notas de crédito, un pago que salda varias facturas) y marca las que quedan sueltas. Todo corre en tu navegador — ningún fichero sale de tu ordenador.",
   dropMain:"Arrastra o <b>sube tu fichero</b> (Excel o CSV)",
   dropSub:"Acepta .xlsx · .xlsm · .xlsb · .xls · .csv · .ods &nbsp;|&nbsp; necesitas las columnas <b>DATA_CERTA</b> y <b>DEB_CRED</b> — ver <b>Instrucciones</b>.",
-  lblTol:"Tolerancia (diferencia aceptada)", lblMax:"Máx. de líneas combinadas por conciliación",
+  lblTol:"Tolerancia", lblMax:"Líneas por grupo",
   optExact:"Exacto (0,00 €)", btnDemo:ICON.play+" Ver ejemplo", btnReset:ICON.refresh+" Refrescar datos", btnDemoHide:ICON.x+" Ocultar ejemplo", btnDownload:ICON.download+" Descargar Excel conciliado",
   mTotal:"Líneas totales", mOk:"Conciliadas <span class='dot g'></span>", mNo:"Sueltas <span class='dot o'></span>", mSaldo:"Saldo abierto",
   tabAll:ICON.list+" Todo", tabLoose:ICON.xc+" Sueltas (saldo)", tabGroups:ICON.link+" Grupos",
@@ -342,12 +591,83 @@ const I18N={
   noteBool:"La columna <b>CONCILIADO</b> sale como VERDADERO/FALSO. En Excel puedes seleccionarla y usar <b>Insertar → Casilla de verificación</b> para hacerla clicable.",
   modalTitle:ICON.book+" Instrucciones",
   step1:"<b>Sube o arrastra</b> tu fichero al área indicada. Formatos aceptados: <b>.xlsx</b>, <b>.xlsm</b>, <b>.xlsb</b>, <b>.xls</b> (97-2003), <b>.csv</b> y <b>.ods</b>.",
-  step2:"Para funcionar, tu Excel debe cumplir <b>dos requisitos</b> en las columnas:",
+  step2:"Si tu fichero viene de un sistema de contabilidad, elígelo en el selector <b>Sistema</b> (<b>CentralGest</b> o <b>Business Central PT</b>) y la app asume sola los nombres de las columnas. En <b>Genérico</b>, tu Excel debe cumplir <b>dos requisitos</b>:",
   calloutA:ICON.cal+" La columna de <b>fechas</b> debe llamarse exactamente <code>DATA_CERTA</code>.<div class='muted' style='margin-top:6px'>El orden de las columnas da igual — la app la busca por el nombre.</div>",
-  calloutB:ICON.money+" Debe existir <b>una única columna</b> llamada <code>DEB_CRED</code> con todos los valores:<div style='margin-top:8px'>• valores a <b>débito</b> con signo <span class='plus'>positivo (+)</span> &nbsp;→&nbsp; ej.: <b>992,63</b><br>• valores a <b>crédito</b> con signo <span class='minus'>negativo (−)</span> &nbsp;→&nbsp; ej.: <b>−992,63</b></div>",
+  calloutB:ICON.money+" Los valores pueden venir de <b>dos formas</b> (lo eliges en el selector <b>Valores</b>):<div style='margin-top:8px'><b>A) Una columna</b> <code>DEB_CRED</code> con todo:<br>• <b>débito</b> con signo <span class='plus'>positivo (+)</span> &nbsp;→&nbsp; ej.: <b>992,63</b><br>• <b>crédito</b> con signo <span class='minus'>negativo (−)</span> &nbsp;→&nbsp; ej.: <b>−992,63</b></div><div style='margin-top:8px'><b>B) Dos columnas</b> <code>DEBITO</code> y <code>CREDITO</code>, ambas con los valores en positivo — la app calcula <b>DEBITO − CREDITO</b> (débitos +, créditos −).</div>",
   step3:"La app busca las líneas cuyo <b>DEB_CRED suma cero</b> y las marca como conciliadas. Las que no casan quedan como <b>SEM IDENTIFICAR</b> y forman el saldo abierto.",
   step4:"Descarga el <b>Excel conciliado</b>, ya con las columnas <b>CONCILIADO</b> (VERDADERO/FALSO) e <b>INFORMAÇÃO</b> (Referência 001, 002…).",
   step5:"Puedes cargar <b>varios ficheros a la vez</b> — la descarga lo junta todo en un solo Excel con <b>una hoja por fichero</b>. Lo que cuenta es el <b>total de líneas</b>: hasta <b>~20.000 líneas</b> sumadas es inmediato; hasta <b>~50.000</b> funciona con una espera de unos segundos.",
+  manual:`<div class="manual">
+<div class="mh">1 · Cómo usarla</div>
+<ol>
+<li>Elige tu <b>Sistema</b> de contabilidad (o déjalo en <b>Genérico</b>).</li>
+<li><b>Arrastra o sube</b> uno o varios ficheros. Acepta <b>.xlsx</b>, <b>.xlsm</b>, <b>.xlsb</b>, <b>.xls</b> (97-2003), <b>.csv</b> y <b>.ods</b>.</li>
+<li>La app lee <b>todas las hojas</b> de cada fichero y concilia cada una.</li>
+<li>Revisa el resultado en las pestañas y <b>descarga el Excel conciliado</b>.</li>
+</ol>
+
+<div class="mh">2 · Qué busca la app</div>
+<p>Busca las líneas cuyos valores <b>suman cero</b>, porque eso significa que ya están saldadas:</p>
+<ul>
+<li>una <b>factura</b> con su <b>pago</b>;</li>
+<li>una factura pagada en <b>varios pagos</b>;</li>
+<li>un <b>pago que salda varias facturas</b>;</li>
+<li>grupos con <b>notas de crédito</b>, anticipos o transferencias.</li>
+</ul>
+<p>Cada grupo recibe una referencia (<b>Referência 001</b>, <b>002</b>…). Lo que no casa con nada queda <b>SEM IDENTIFICAR</b> — y es justo eso lo que compone el <b>saldo abierto</b> de la cuenta en ese momento.</p>
+
+<div class="mh">3 · Sistemas de contabilidad</div>
+<p>Si el fichero viene de un sistema conocido, elígelo y la app asume sola los nombres de las columnas:</p>
+<ul>
+<li><b>CentralGest</b> — concilia siempre a <b>dos columnas</b>: <code>Débito</code>, <code>Crédito</code> y fecha en <code>Data Doc. Externo</code>.</li>
+<li><b>Business Central PT</b> — concilia siempre a <b>una columna</b>: <code>Valor</code> y fecha en <code>Data Registo</code>.</li>
+<li><b>Genérico</b> — detección automática; tú eliges en <b>Valores</b>.</li>
+</ul>
+
+<div class="mh">4 · Las columnas (modo Genérico)</div>
+<div class="callout a">📅 La columna de <b>fechas</b> debe llamarse <code>DATA_CERTA</code>. El orden de las columnas da igual — la app las busca por el nombre.</div>
+<div class="callout b">💶 Los valores pueden venir de <b>dos formas</b>:
+<div style="margin-top:8px"><b>A) Una columna</b> <code>DEB_CRED</code> con todo:<br>
+• <b>débito</b> en <span class="plus">positivo (+)</span> → ej.: <b>992,63</b><br>
+• <b>crédito</b> en <span class="minus">negativo (−)</span> → ej.: <b>−992,63</b></div>
+<div style="margin-top:8px"><b>B) Dos columnas</b> <code>DEBITO</code> y <code>CREDITO</code>, ambas en positivo — la app calcula <b>DEBITO − CREDITO</b>.</div></div>
+<p class="muted">Las hojas sin estas columnas no se concilian, pero igualmente se incluyen en el fichero final.</p>
+
+<div class="mh">5 · Opciones</div>
+<ul>
+<li><b>Tolerancia</b> — diferencia máxima aceptada para dar un grupo por cuadrado (de <b>exacto</b> hasta <b>± 5 €</b>). Sirve para redondeos y diferencias de céntimos. Cuanto mayor, más encuentra… pero más riesgo de juntar líneas sin relación.</li>
+<li><b>Líneas por grupo</b> — cuántas líneas puede sumar en conjunto (hasta <b>20</b>). Ej.: 1 factura pagada con 3 pagos = 4 líneas.</li>
+<li><b>Ordenar hojas</b> — orden original, creciente (A→Z) o decreciente (Z→A) en el fichero final.</li>
+<li><b>Hoja Índice</b> — crea una hoja <b>Indice</b> al principio con enlaces a todas las hojas (y sus estadísticas). En cada hoja, la celda <b>A1</b> te lleva de vuelta al índice.</li>
+<li><b>Refrescar datos</b> — lo limpia todo y deja la app lista para una carga nueva.</li>
+</ul>
+
+<div class="mh">6 · Varios ficheros a la vez</div>
+<p>Puedes cargar <b>varios ficheros</b> al mismo tiempo: si uno tiene 20 hojas y otros dos tienen 1 hoja cada uno, el fichero final tendrá <b>22 hojas</b>. Cada hoja aparece como pestaña abajo — pasa el ratón para ver sus estadísticas.</p>
+<p>Lo que pesa es el <b>total de líneas</b>: hasta unas <b>20.000 líneas</b> sumadas es inmediato; hasta <b>50.000</b> funciona con una espera de unos segundos.</p>
+
+<div class="mh">7 · El fichero que descargas</div>
+<p>Es tu Excel original con <b>dos columnas nuevas</b> a la derecha:</p>
+<ul>
+<li><b>CONCILIADO</b> — VERDADERO o FALSO. En Excel puedes seleccionar la columna y usar <b>Insertar → Casilla de verificación</b> para volverla clicable.</li>
+<li><b>INFORMAÇÃO</b> — la referencia del grupo, o <b>SEM IDENTIFICAR</b>.</li>
+</ul>
+
+<div class="mh">8 · Seguridad y privacidad de tus datos</div>
+<p>Esta aplicación está pensada para trabajar con <b>información sensible</b>, por eso funciona de forma distinta a la mayoría de apps online:</p>
+<div class="callout a">
+<b>Nada se envía a internet.</b> Cuando arrastras un fichero, <b>no se sube a ningún servidor</b>. El Excel se abre, se lee y se procesa <b>dentro de tu propio navegador</b>, en tu ordenador. La app ni siquiera tiene código para enviar ficheros — y el código es público, se puede comprobar.
+</div>
+<ul>
+<li><b>No se guarda nada.</b> Los datos solo existen en la <b>memoria temporal de la pestaña</b> mientras la tienes abierta. La app no escribe nada en cookies ni en la memoria del navegador. Cierras la pestaña y desaparece todo; el botón <b>Refrescar datos</b> lo limpia al instante.</li>
+<li><b>No hay cuentas, ni registros, ni base de datos.</b> Nadie sabe qué ficheros has abierto — no existe historial del lado del sitio.</li>
+<li><b>El único fichero que queda</b> es el que <b>tú</b> descargas, en tu carpeta de descargas: en tu máquina y bajo tu control.</li>
+<li><b>¿Quieres más garantías todavía?</b> Abre la app en una <b>ventana privada/incógnito</b>: al cerrarla el navegador no guarda absolutamente nada, ni siquiera la copia de la propia página.</li>
+<li><b>Borrar el historial y la caché</b> elimina la copia guardada de la <b>página</b> — nunca tus datos, porque esos nunca llegaron a guardarse en ningún sitio.</li>
+<li><b>Conexión segura (HTTPS)</b> entre tu navegador y el sitio, usada solo para cargar la propia aplicación.</li>
+</ul>
+<p class="muted">Nota técnica: la página carga dos librerías públicas (SheetJS y ExcelJS) para leer y escribir Excel. Son <b>ficheros de código que vienen</b> hacia tu navegador — el tráfico va siempre en ese sentido; tus datos nunca hacen el camino inverso.</p>
+</div>`,
   modalOk:"Entendido",
   detected:"Columnas detectadas — importes: {v} · fecha: {f} · cabecera en la fila {r}",
   warnBig:ICON.alert+" fichero muy grande: algunas conciliaciones complejas pueden no haberse buscado",
@@ -356,13 +676,20 @@ const I18N={
   grpRows:"filas Excel", grpEmpty:"Sin grupos conciliados.",
   pillTrue:"VERDADERO", pillFalse:"FALSO",
   processing:"Procesando {i}/{n}",
-  filesSum:ICON.file+" {n} fichero(s) cargado(s) · {l} líneas en total",
+  filesSum:ICON.file+" {n} fichero(s) · {s} hoja(s) · {l} líneas en total",
+  noRecon:"Hoja sin columna DEB_CRED ni DEBITO/CREDITO — igualmente se incluye en el fichero final, sin conciliar.",
+  lblSort:"Ordenar hojas", sortOrig:"Orden original", sortAsc:"Creciente (A → Z)", sortDesc:"Decreciente (Z → A)",
+  lblMode:"Valores", modeAuto:"Automático", modeOne:"1 columna (DEB_CRED)", modeTwo:"2 columnas (DEBITO/CREDITO)",
+  lblPreset:"Sistema", presetGen:"Genérico",
+  lblIndex:"Añadir hoja Índice",
  }
 };
 let LANG="pt";
 function t(k){ return (I18N[LANG] && I18N[LANG][k]) || I18N.pt[k] || k; }
 function plain(k){ return String(t(k)).replace(/<[^>]*>/g,"").trim(); }
 function applyLang(lang){
+  const mb=document.getElementById("manual-body");
+  if(mb) mb.innerHTML=(I18N[lang]&&I18N[lang].manual)||I18N.pt.manual;
   LANG=lang;
   document.documentElement.lang = lang==="pt"?"pt":(lang==="en"?"en":"es");
   document.querySelectorAll("[data-i18n]").forEach(el=>{ el.innerHTML=t(el.dataset.i18n); });
@@ -390,7 +717,9 @@ function normHeader(v){
   return String(v).normalize("NFKD").replace(/[̀-ͯ]/g,"").replace(/[^A-Za-z0-9]/g,"").toUpperCase();
 }
 const ALIAS_VALOR = new Set(["DEBCRED","DEBECRED","DEBITOCREDITO","SALDO","VALOR"]);
-const ALIAS_FECHA = new Set(["DATACERTA","FECHACIERTA","FECHA","DATA","DATALANC","DATALANCAMENTO"]);
+const ALIAS_FECHA = new Set(["DATACERTA","FECHACIERTA","FECHA","DATA","DATALANC","DATALANCAMENTO","DATAREGISTO","DATADOCEXTERNO"]);
+const ALIAS_DEB = new Set(["DEBITO","DEBITOS","DEBE","DEBIT","DEBITS","DEBITO1"]);
+const ALIAS_CRE = new Set(["CREDITO","CREDITOS","HABER","CREDIT","CREDITS","CREDITO1"]);
 function detectar(headers, alias, pref){
   const np = normHeader(pref);
   for(const h of headers) if(normHeader(h)===np) return h;
@@ -431,7 +760,10 @@ function dayDist(a,b){
   return Math.abs(Math.round((a-b)/86400000));
 }
 function fmtEUR(cents){
-  return (cents/100).toLocaleString("pt-PT",{minimumFractionDigits:2,maximumFractionDigits:2})+" €";
+  return (cents/100).toLocaleString("de-DE",{minimumFractionDigits:2,maximumFractionDigits:2})+" €";
+}
+function fmtMoney(n){
+  return n.toLocaleString("de-DE",{minimumFractionDigits:2,maximumFractionDigits:2});
 }
 function* combos(n,r){
   const idx=Array.from({length:r},(_,i)=>i);
@@ -581,54 +913,123 @@ function mejorSub(cands,objetivo,tol,maxN,budget){
 // ---------------- integração com o Excel ----------------
 let FILES=[]; let CUR=-1; // lista de ficheiros processados
 
+// Perfis de sistemas de contabilidade: fixam o modo e os nomes das colunas
+// tal como saem dos relatórios Excel exportados por cada sistema.
+const PRESETS={
+  centralgest:{nome:"CentralGest", mode:"two",
+    deb:["DEBITO"], cre:["CREDITO"], fecha:["DATADOCEXTERNO"],
+    rot:{deb:"Débito", cre:"Crédito", fecha:"Data Doc. Externo"}},
+  bcpt:{nome:"Business Central PT", mode:"one",
+    valor:["VALOR"], fecha:["DATAREGISTO"],
+    rot:{valor:"Valor", fecha:"Data Registo"}}
+};
+function presetAtual(){
+  const e=document.getElementById("preset");
+  return (e&&PRESETS[e.value])?PRESETS[e.value]:null;
+}
+
+// modo: "auto" | "one" (DEB_CRED) | "two" (DEBITO/CREDITO)
+function modoValores(){
+  const P=presetAtual(); if(P) return P.mode;      // o perfil manda
+  const el=document.getElementById("mode");
+  return el?el.value:"auto";
+}
+function scanHdr(hdr){
+  const P=presetAtual();
+  if(P){                                            // nomes exatos do sistema
+    const S=a=>new Set(a);
+    return {
+      cv:P.valor?detectar(hdr,S(P.valor),P.valor[0]):null,
+      cd:P.deb  ?detectar(hdr,S(P.deb),  P.deb[0])  :null,
+      cc:P.cre  ?detectar(hdr,S(P.cre),  P.cre[0])  :null,
+      cf:detectar(hdr,S(P.fecha),P.fecha[0])
+    };
+  }
+  return {
+    cv:detectar(hdr,ALIAS_VALOR,"DEB_CRED"),
+    cd:detectar(hdr,ALIAS_DEB,"DEBITO"),
+    cc:detectar(hdr,ALIAS_CRE,"CREDITO"),
+    cf:detectar(hdr,ALIAS_FECHA,"DATA_CERTA")
+  };
+}
+// Decide que colunas usar segundo o modo escolhido.
+// Duas colunas: valor = DEBITO - CREDITO (débitos +, créditos -).
+function resolverModo(s){
+  const modo=modoValores();
+  const temUma=!!s.cv, temDuas=!!(s.cd&&s.cc);
+  if(modo==="one")  return temUma ? {tipo:"one"} : {tipo:null};
+  if(modo==="two")  return temDuas ? {tipo:"two"} : {tipo:null};
+  if(temUma) return {tipo:"one"};
+  if(temDuas) return {tipo:"two"};
+  return {tipo:null};
+}
 function findHeaderRow(aoa){
   for(let r=0;r<Math.min(15,aoa.length);r++){
     const hdr=aoa[r]||[];
-    const cv=detectar(hdr,ALIAS_VALOR,"DEB_CRED"), cf=detectar(hdr,ALIAS_FECHA,"DATA_CERTA");
-    if(cv&&cf) return {r,hdr,cv,cf};
+    const s=scanHdr(hdr);
+    if(s.cf && resolverModo(s).tipo) return Object.assign({r,hdr},s);
   }
   const hdr=aoa[0]||[];
-  return {r:0,hdr,cv:detectar(hdr,ALIAS_VALOR,"DEB_CRED"),cf:detectar(hdr,ALIAS_FECHA,"DATA_CERTA")};
+  return Object.assign({r:0,hdr},scanHdr(hdr));
 }
 
-function procesar(wb, filename){  // devolve a entrada processada
-  const sheetName=wb.SheetNames[0];
+// Processa UMA folha. Se não tiver coluna DEB_CRED, devolve na mesma a folha
+// (resultado=null) para que seja incluída no ficheiro final sem conciliação.
+function procesar(wb, sheetName, filename){
   const ws=wb.Sheets[sheetName];
+  if(!ws) return null;
   const aoa=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,cellDates:true,defval:null});
-  const {r:headerRow,hdr,cv,cf}=findHeaderRow(aoa);
-  if(!cv){ alert(t("errNoCol")); return; }
-  const ci_valor=hdr.indexOf(cv), ci_fecha=cf?hdr.indexOf(cf):-1;
+  const {r:headerRow,hdr,cv,cd,cc,cf}=findHeaderRow(aoa);
+  const modo=resolverModo({cv,cd,cc}).tipo;
+  const base={wb,aoa,headers:hdr||[],headerRow:headerRow||0,sheetName,filename,cv,cd,cc,cf,modo};
+  if(!modo) return Object.assign(base,{resultado:null,stopped:false});
 
+  const ci_valor=modo==="one"?hdr.indexOf(cv):-1;
+  const ci_deb=modo==="two"?hdr.indexOf(cd):-1;
+  const ci_cre=modo==="two"?hdr.indexOf(cc):-1;
+  const ci_fecha=cf?hdr.indexOf(cf):-1;
   const filas=[];
   for(let r=headerRow+1;r<aoa.length;r++){
     const rowArr=aoa[r]||[];
     if(rowArr.every(c=>c==null||c==="")) continue;
-    filas.push({row:r, valor:toCents(rowArr[ci_valor]), fecha:ci_fecha>=0?parseFecha(rowArr[ci_fecha]):null});
+    let valor;
+    if(modo==="one") valor=toCents(rowArr[ci_valor]);
+    else {                                   // débitos (+) menos créditos (−)
+      const d=toCents(rowArr[ci_deb])||0, c2=toCents(rowArr[ci_cre])||0;
+      valor=d-c2;
+    }
+    filas.push({row:r, valor, fecha:ci_fecha>=0?parseFecha(rowArr[ci_fecha]):null});
   }
   const cfg={tol:+document.getElementById("tol").value, maxG:+document.getElementById("maxg").value, maxCand:40};
   const resultado=conciliar(filas,cfg);
-  return {wb,aoa,headerRow,ci_valor,ci_fecha,headers:hdr,sheetName,resultado,cv,cf,filename,
-          stopped:!!window.__budget_stopped};
+  return Object.assign(base,{ci_valor,ci_deb,ci_cre,ci_fecha,resultado,stopped:!!window.__budget_stopped});
 }
 
+// Carrega TODAS as folhas de um ficheiro (um ficheiro com 20 folhas -> 20 entradas)
 function addFile(wb, filename, isDemo){
-  const entry=procesar(wb, filename);
-  if(!entry) return;
-  entry.isDemo=!!isDemo;
   if(!isDemo) FILES=FILES.filter(e=>!e.isDemo);   // um ficheiro real substitui o exemplo
-  FILES.push(entry);
+  let n=0;
+  for(const sn of wb.SheetNames){
+    const entry=procesar(wb, sn, filename);
+    if(!entry) continue;
+    entry.isDemo=!!isDemo;
+    FILES.push(entry); n++;
+  }
+  if(!n) return;
   CUR=FILES.length-1;
   render();
 }
 
 function renderChips(){
   const box=document.getElementById("sheetbar");
-  if(FILES.length<=1 && FILES.every(e=>e.isDemo)){ box.innerHTML=""; box.classList.add("hidden"); return; }
+  if(FILES.length<=1){ box.innerHTML=""; box.classList.add("hidden"); return; }
   box.classList.remove("hidden");
   box.innerHTML=FILES.map((e,i)=>{
-    const R=e.resultado.resumen;
-    const nome=e.filename.length>22?e.filename.slice(0,20)+"…":e.filename;
-    const stats=`${plain("mTotal")}: ${R.total} | ${plain("mOk")}: ${R.ok} | ${plain("mNo")}: ${R.no} | ${plain("mSaldo")}: ${fmtEUR(R.saldo)}`;
+    const R=e.resultado?e.resultado.resumen:null;
+    const nome=e.sheetName.length>22?e.sheetName.slice(0,20)+"…":e.sheetName;
+    const stats=R
+      ? `${e.filename} — ${plain("mTotal")}: ${R.total} | ${plain("mOk")}: ${R.ok} | ${plain("mNo")}: ${R.no} | ${plain("mSaldo")}: ${fmtEUR(R.saldo)}`
+      : `${e.filename} — ${plain("noRecon")}`;
     return `<div class="stab ${i===CUR?"active":""}" data-i="${i}" title="${stats}">${ICON.file} ${nome}
        <span class="x" data-x="${i}" title="remover">×</span></div>`;
   }).join("");
@@ -651,43 +1052,58 @@ function render(){
   const {aoa,headerRow,headers,resultado,cv,cf}=FILES[CUR];
   document.getElementById("results").classList.remove("hidden");
   renderChips();
-  const totLin=FILES.reduce((s,e)=>s+e.resultado.resumen.total,0);
+  const totLin=FILES.reduce((s,e)=>s+(e.resultado?e.resultado.resumen.total:0),0);
+  const nFich=new Set(FILES.map(e=>e.filename)).size;
   document.getElementById("filesum").innerHTML=
-    t("filesSum").replace("{n}",FILES.length).replace("{l}",totLin.toLocaleString("pt-PT"));
+    t("filesSum").replace("{n}",nFich).replace("{s}",FILES.length).replace("{l}",totLin.toLocaleString("de-DE"));
   const aviso = FILES[CUR].stopped
     ? ` · <span style="color:#a6432b;font-weight:600">${t("warnBig")}</span>`
     : "";
-  document.getElementById("detected").innerHTML=
-    t("detected").replace("{v}",`<span class="badge">${cv}</span>`)
-                 .replace("{f}",`<span class="badge">${cf||"—"}</span>`)
-                 .replace("{r}",headerRow+1) + aviso;
-  const R=resultado.resumen;
-  document.getElementById("m-total").textContent=R.total;
-  document.getElementById("m-ok").textContent=R.ok;
-  document.getElementById("m-no").textContent=R.no;
-  document.getElementById("m-saldo").textContent=fmtEUR(R.saldo);
+  const E=FILES[CUR];
+  const valTxt = E.modo==="two"
+    ? `<span class="badge">${E.cd}</span> − <span class="badge">${E.cc}</span>`
+    : `<span class="badge">${cv}</span>`;
+  document.getElementById("detected").innerHTML= resultado
+    ? t("detected").replace("{v}",valTxt)
+                   .replace("{f}",`<span class="badge">${cf||"—"}</span>`)
+                   .replace("{r}",headerRow+1) + aviso
+    : `<span class="muted">${t("noRecon")}</span>`;
+  const R=resultado?resultado.resumen:null;
+  document.getElementById("m-total").textContent=R?R.total:"–";
+  document.getElementById("m-ok").textContent=R?R.ok:"–";
+  document.getElementById("m-no").textContent=R?R.no:"–";
+  document.getElementById("m-saldo").textContent=R?fmtEUR(R.saldo):"–";
 
   // tabela principal
   const cols=headers.map(h=>h==null?"":h);
+  const MONEY=new Set(["DEBCRED","DEBECRED","DEBITOCREDITO","DEBITO","CREDITO","SALDO","VALOR"]);
+  const moneyCols=new Set();
+  headers.forEach((hh,i)=>{ if(MONEY.has(normHeader(hh))) moneyCols.add(i); });
   const buildTable=(onlyLoose)=>{
     let html="<thead><tr>";
     for(const c of cols) html+=`<th>${c}</th>`;
-    html+="<th>CONCILIADO</th><th>INFORMAÇÃO</th></tr></thead><tbody>";
+    html+=(resultado?"<th>CONCILIADO</th><th>INFORMAÇÃO</th>":"")+"</tr></thead><tbody>";
     for(let r=headerRow+1;r<aoa.length;r++){
       const rowArr=aoa[r]; if(!rowArr) continue;
       if(rowArr.every(c=>c==null||c==="")) continue;
-      const a=resultado.asign.get(r); if(!a) continue;
-      if(onlyLoose && a.conc) continue;
-      html+=`<tr class="${a.conc?"ok":"no"}">`;
+      const a=resultado?resultado.asign.get(r):null;
+      if(resultado && !a) continue;
+      if(onlyLoose && (!a || a.conc)) continue;
+      html+=`<tr class="${a?(a.conc?"ok":"no"):""}">`;
       for(let i=0;i<cols.length;i++){
-        let v=rowArr[i];
+        let v=rowArr[i], cls="";
         if(v instanceof Date) v=v.toLocaleDateString("pt-PT");
-        else if(typeof v==="number" && !Number.isInteger(v))
-          v=v.toLocaleString("pt-PT",{minimumFractionDigits:2,maximumFractionDigits:2});
-        html+=`<td>${v==null?"":v}</td>`;
+        else if(typeof v==="number"){
+          const s=(moneyCols.has(i)||!Number.isInteger(v))?fmtMoney(v):String(v);
+          v=`<span class="mono">${s}</span>`; cls=' class="tnum"';
+        }
+        html+=`<td${cls}>${v==null?"":v}</td>`;
       }
-      html+=`<td><span class="pill ${a.conc?"ok":"no"}">${a.conc?t("pillTrue"):t("pillFalse")}</span></td>`;
-      html+=`<td class="ref">${a.ref}</td></tr>`;
+      if(a){
+        html+=`<td><span class="pill ${a.conc?"ok":"no"}">${a.conc?t("pillTrue"):t("pillFalse")}</span></td>`;
+        html+=`<td class="ref">${a.ref}</td>`;
+      }
+      html+="</tr>";
     }
     return html+"</tbody>";
   };
@@ -696,55 +1112,102 @@ function render(){
 
   // grupos
   let g="";
-  for(const grp of resultado.grupos){
+  for(const grp of (resultado?resultado.grupos:[])){
     const tipoTxt = grp.tipo==="fatura+pagamento (1:1)" ? t("grpType1") : t("grpTypeN");
     g+=`<div class="grp"><div class="h">${grp.ref}</div>
         <div class="muted">${tipoTxt} · ${t("grpRows")} ${grp.rows.map(x=>x+1).join(", ")}</div></div>`;
   }
-  if(!resultado.grupos.length) g=`<div class="muted">${t("grpEmpty")}</div>`;
+  if(!resultado || !resultado.grupos.length) g=`<div class="muted">${t("grpEmpty")}</div>`;
   document.getElementById("view-groups").innerHTML=g;
 }
 
 async function descargar(){
   if(!FILES.length) return;
-  // Um único ficheiro de saída com UMA FOLHA POR CADA Excel carregado.
+  const IDX_NAME="Indice";
+  const addIdx=document.getElementById("opt-index").checked;
+  const sortMode=(document.getElementById("sort")||{value:"orig"}).value;
+
+  // nome de folha válido para Excel (<=31, sem \ / * ? : [ ] nem aspas)
+  const limpiar=s=>String(s||"Folha").replace(/[\\\/\*\?\:\[\]'"]/g,"-").trim().substring(0,31)||"Folha";
+  const usados=new Set([IDX_NAME.toLowerCase()]);
+  let lista=FILES.map(E=>{
+    let base=limpiar(E.sheetName), nome=base, k=2;
+    while(usados.has(nome.toLowerCase())){ nome=base.substring(0,28)+"~"+(k++); }
+    usados.add(nome.toLowerCase());
+    return {E,nome};
+  });
+  if(sortMode==="asc")  lista.sort((a,b)=>a.nome.localeCompare(b.nome,"pt",{numeric:true}));
+  if(sortMode==="desc") lista.sort((a,b)=>b.nome.localeCompare(a.nome,"pt",{numeric:true}));
+
   const wb2=new ExcelJS.Workbook();
   const FONT={name:"Calibri",size:10};
   const FONT_H={name:"Calibri",size:10,bold:true};
-  const usados=new Set();
-  for(const E of FILES){
-    const {aoa,headerRow,headers,resultado,filename}=E;
+  const LINK={name:"Calibri",size:10,bold:true,color:{argb:"FF1F6FE0"},underline:true};
+
+  // A folha Índice fica em PRIMEIRO lugar
+  let wsIdx=null;
+  if(addIdx) wsIdx=wb2.addWorksheet(IDX_NAME,{views:[{showGridLines:false}]});
+
+  for(const it of lista){
+    const {aoa,headerRow,headers,resultado}=it.E;
     const out=aoa.map(r=>r?r.slice():[]);
     const cc=headers.length, ci=headers.length+1;
-    out[headerRow]=out[headerRow]||[];
-    out[headerRow][cc]="CONCILIADO"; out[headerRow][ci]="INFORMAÇÃO";
-    for(let r=headerRow+1;r<out.length;r++){
-      const a=resultado.asign.get(r); if(!a) continue;
-      out[r][cc]=a.conc; out[r][ci]=a.ref;
+    if(resultado){
+      out[headerRow]=out[headerRow]||[];
+      out[headerRow][cc]="CONCILIADO"; out[headerRow][ci]="INFORMAÇÃO";
+      for(let r=headerRow+1;r<out.length;r++){
+        const a=resultado.asign.get(r); if(!a) continue;
+        out[r][cc]=a.conc; out[r][ci]=a.ref;
+      }
     }
-    // nome de folha: nome do ficheiro sem extensão, saneado e único (máx. 31)
-    let nome=(filename||"Conta Corrente").replace(/\.[^.]+$/,"")
-      .replace(/[\\\/\*\?\:\[\]]/g,"-").substring(0,28)||"Folha";
-    let base=nome,k=2; while(usados.has(nome)){nome=base.substring(0,25)+"~"+k++;}
-    usados.add(nome);
-    const ws2=wb2.addWorksheet(nome,{views:[{showGridLines:false}]});
+    // com Índice: insere 2 linhas no topo (A1 = ligação de volta ao índice)
+    const off=addIdx?2:0;
+    if(addIdx) out.unshift([],[]);
+
+    const ws2=wb2.addWorksheet(it.nome,{views:[{showGridLines:false}]});
     out.forEach((rowArr,ri)=>{
       const row=ws2.getRow(ri+1);
       (rowArr||[]).forEach((v,ciX)=>{
         if(v===undefined) return;
         const cell=row.getCell(ciX+1);
         cell.value=v;
-        cell.font=(ri===headerRow)?FONT_H:FONT;
+        cell.font=(ri===headerRow+off)?FONT_H:FONT;
         if(v instanceof Date) cell.numFmt="dd-mm-yyyy";
       });
       row.commit && row.commit();
     });
-    ws2.getColumn(cc+1).width=13; ws2.getColumn(ci+1).width=26;
+    if(addIdx){
+      const c=ws2.getCell("A1");
+      c.value={formula:`HYPERLINK("#'${IDX_NAME}'!A1","${IDX_NAME}")`,result:IDX_NAME};
+      c.font=LINK;
+    }
+    if(resultado){ ws2.getColumn(cc+1).width=13; ws2.getColumn(ci+1).width=26; }
   }
+
+  // preencher o Índice com ligações para cada folha (célula A1 de cada uma)
+  if(wsIdx){
+    wsIdx.getColumn(1).width=42; wsIdx.getColumn(2).width=13;
+    wsIdx.getColumn(3).width=13; wsIdx.getColumn(4).width=13; wsIdx.getColumn(5).width=18;
+    const head=["FOLHA","LINHAS","CONCILIADAS","SOLTAS","SALDO"];
+    head.forEach((t2,i)=>{ const c=wsIdx.getCell(1,i+1); c.value=t2; c.font=FONT_H; });
+    lista.forEach((it,i)=>{
+      const r=i+2;
+      const c=wsIdx.getCell(r,1);
+      c.value={formula:`HYPERLINK("#'${it.nome}'!A1","${it.nome}")`,result:it.nome};
+      c.font=LINK;
+      const R=it.E.resultado?it.E.resultado.resumen:null;
+      [R?R.total:"",R?R.ok:"",R?R.no:"",R?R.saldo/100:""].forEach((v,j)=>{
+        const cx=wsIdx.getCell(r,j+2); cx.value=v; cx.font=FONT;
+        if(j===3&&R) cx.numFmt='#,##0.00';
+      });
+    });
+  }
+
   const buf=await wb2.xlsx.writeBuffer();
-  const nomeOut = FILES.length>1
-    ? `CONCILIADO_${FILES.length}_ficheiros.xlsx`
-    : (FILES[0].filename||"conta_corrente").replace(/\.[^.]+$/,"")+"_CONCILIADO.xlsx";
+  const nFich=new Set(FILES.map(e=>e.filename)).size;
+  const nomeOut = nFich>1
+    ? `CONCILIADO_${nFich}_ficheiros.xlsx`
+    : (FILES[0].filename||"contas").replace(/\.[^.]+$/,"")+"_CONCILIADO.xlsx";
   const blob=new Blob([buf],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
   const a=document.createElement("a");
   a.href=URL.createObjectURL(blob); a.download=nomeOut;
@@ -858,7 +1321,15 @@ async function leerFicheros(lista){
   }
   prog.classList.add("hidden");
 }
+function replayBoot(ms){
+  if(!document.getElementById("__bootstyle")||!window.__bootHTML) return;
+  let d=document.getElementById("__boot"); if(d) d.remove();
+  d=document.createElement("div"); d.id="__boot"; d.innerHTML=window.__bootHTML;
+  document.documentElement.appendChild(d);
+  setTimeout(()=>{ d.className="off"; setTimeout(()=>{ if(d.parentNode) d.remove(); },500); }, ms||1500);
+}
 document.getElementById("reset").addEventListener("click",()=>{
+  replayBoot(1600);
   FILES=[]; CUR=-1;
   document.getElementById("results").classList.add("hidden");
   document.getElementById("progress").classList.add("hidden");
@@ -889,12 +1360,12 @@ document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{
   document.getElementById("view-loose").classList.toggle("hidden",v!=="loose");
   document.getElementById("view-groups").classList.toggle("hidden",v!=="groups");
 }));
-[document.getElementById("tol"),document.getElementById("maxg")].forEach(el=>
+[document.getElementById("tol"),document.getElementById("maxg"),document.getElementById("mode"),document.getElementById("preset")].forEach(el=>
   el.addEventListener("change",()=>{
     if(!FILES.length) return;
-    const olds=FILES.map(e=>({wb:e.wb,filename:e.filename,isDemo:e.isDemo}));
+    const olds=FILES.map(e=>({wb:e.wb,sheetName:e.sheetName,filename:e.filename,isDemo:e.isDemo}));
     const cur=CUR; FILES=[];
-    olds.forEach(o=>{ const en=procesar(o.wb,o.filename); if(en){en.isDemo=o.isDemo; FILES.push(en);} });
+    olds.forEach(o=>{ const en=procesar(o.wb,o.sheetName,o.filename); if(en){en.isDemo=o.isDemo; FILES.push(en);} });
     CUR=Math.min(cur,FILES.length-1); render();
   }));
 // tema claro/escuro
@@ -907,7 +1378,11 @@ btnTheme.addEventListener("click",()=>{
 });
 
 // mostra o exemplo automaticamente ao abrir
-window.addEventListener("load",()=>{applyLang(LANG);document.getElementById("demo").click();});
+window.addEventListener("load",()=>{
+  applyLang(LANG);
+  document.getElementById("demo").click();
+  setTimeout(()=>{ if(window.__hideBoot) window.__hideBoot(); },140);
+});
 </script>
 
 <!-- Modal de instruções -->
@@ -918,26 +1393,7 @@ window.addEventListener("load",()=>{applyLang(LANG);document.getElementById("dem
       <button class="close" id="modal-close" title="Fechar">×</button>
     </div>
     <div class="modal-body">
-      <div class="step"><div class="n">1</div><div class="t" data-i18n="step1"><b>Carrega ou arrasta</b> o teu ficheiro para a área indicada. Formatos aceites: <b>.xlsx</b>, <b>.xlsm</b>, <b>.xlsb</b>, <b>.xls</b> (97-2003), <b>.csv</b> e <b>.ods</b>.</div></div>
-      <div class="step"><div class="n">2</div><div class="t" data-i18n="step2">Para funcionar, o teu Excel tem de cumprir <b>dois requisitos</b> nas colunas:</div></div>
-
-      <div class="callout a">
-        <span data-i18n="calloutA">📅 A coluna das <b>datas</b> tem de se chamar exatamente <code>DATA_CERTA</code>.
-        <div class="muted" style="margin-top:6px">A ordem das colunas pode ser qualquer — a app procura-a pelo nome.</div></span>
-      </div>
-
-      <div class="callout b">
-        <span data-i18n="calloutB">💶 Tem de existir <b>uma única coluna</b> chamada <code>DEB_CRED</code> com todos os valores:
-        <div style="margin-top:8px">
-          • valores a <b>débito</b> com sinal <span class="plus">positivo (+)</span> &nbsp;→&nbsp; ex.: <b>992,63</b><br>
-          • valores a <b>crédito</b> com sinal <span class="minus">negativo (−)</span> &nbsp;→&nbsp; ex.: <b>−992,63</b>
-        </div></span>
-      </div>
-
-      <div class="step"><div class="n">3</div><div class="t" data-i18n="step3">A app procura as linhas cujo <b>DEB_CRED soma zero</b> e marca-as como conciliadas. As que não casam ficam <b>SEM IDENTIFICAR</b> e formam o saldo em aberto.</div></div>
-      <div class="step"><div class="n">4</div><div class="t" data-i18n="step4">Descarrega o <b>Excel conciliado</b>, já com as colunas <b>CONCILIADO</b> (VERDADEIRO/FALSO) e <b>INFORMAÇÃO</b> (Referência 001, 002…).</div></div>
-
-      <div class="step"><div class="n">5</div><div class="t" data-i18n="step5">Podes carregar <b>vários ficheiros de uma vez</b> — a descarga junta tudo num só Excel, com <b>uma folha por ficheiro</b>. O que conta é o <b>total de linhas</b>: até <b>~20.000 linhas</b> somadas é imediato; até <b>~50.000</b> funciona com uma espera de alguns segundos.</div></div>
+      <div id="manual-body"></div>
 
       <button class="btn" id="modal-ok" style="margin-top:6px" data-i18n="modalOk">Percebi 👍</button>
     </div>
@@ -960,6 +1416,7 @@ window.addEventListener("load",()=>{applyLang(LANG);document.getElementById("dem
       d.classList.remove("open"); d.querySelector(".dd-menu").classList.add("hidden");
     });
   }
+  const DDREG={};
   function enhance(sel){
     sel.style.display="none";
     const dd=document.createElement("div"); dd.className="dd";
@@ -992,8 +1449,18 @@ window.addEventListener("load",()=>{applyLang(LANG);document.getElementById("dem
     dd.appendChild(btn); dd.appendChild(menu);
     sel.parentNode.insertBefore(dd, sel.nextSibling);
     sync();
+    DDREG[sel.id]={dd,sync};
   }
-  ["tol","maxg"].forEach(id=>{ const s=document.getElementById(id); if(s) enhance(s); });
+  ["preset","mode","tol","maxg","sort"].forEach(id=>{ const s=document.getElementById(id); if(s) enhance(s); });
+  // Um perfil fixa o modo de valores -> o seletor "Valores" fica bloqueado
+  window.__applyPreset=function(){
+    const P=presetAtual(), mSel=document.getElementById("mode"), reg=DDREG["mode"];
+    if(P){ mSel.value=P.mode; reg&&reg.sync(); reg&&reg.dd.classList.add("dis"); }
+    else { reg&&reg.dd.classList.remove("dis"); }
+  };
+  const pSel=document.getElementById("preset");
+  if(pSel) pSel.addEventListener("change",()=>window.__applyPreset());
+  window.__applyPreset();
   document.addEventListener("click",closeAllDD);
   document.querySelectorAll("#langs .lang").forEach(b=>
     b.addEventListener("click",()=>applyLang(b.dataset.lang)));

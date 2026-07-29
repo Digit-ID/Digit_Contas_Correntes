@@ -89,7 +89,7 @@ window.__hideBoot=function(){
   .wrap{padding:22px 24px 40px;max-width:1120px;margin:0 auto}
   .hero{margin:6px 0 18px}
   .hero h1{margin:0;font-size:22px;font-weight:800;letter-spacing:-.3px}
-  .hero p{margin:7px 0 0;font-size:13.5px;color:var(--muted);max-width:780px}
+  .hero p{margin:7px 0 0;font-size:13.5px;color:var(--muted)}
   .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;
     box-shadow:0 2px 8px rgba(20,40,90,.05)}
   .drop{border:2px dashed #c4d0e8;border-radius:14px;padding:30px;text-align:center;cursor:pointer;
@@ -156,8 +156,11 @@ window.__hideBoot=function(){
   .mh2{font-weight:800;font-size:12.5px;padding-bottom:6px;border-bottom:1px solid var(--line)}
   .syrow{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line);
     border-radius:9px;margin-bottom:6px;font-size:12.5px}
-  .syrow .del{margin-left:auto;cursor:pointer;color:var(--muted);font-weight:800;padding:0 4px}
-  .syrow .del:hover{color:#c0392b}
+  .syrow{justify-content:space-between}
+  .syrow .del{margin-left:auto;height:30px;padding:0 11px;font-size:12px;flex:0 0 auto}
+  .syrow .del.danger{background:#c0392b;color:#fff;border-color:#c0392b}
+  .tagfix{margin-left:auto;font-size:10.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;
+    color:var(--muted);background:var(--chip);padding:3px 8px;border-radius:6px;flex:0 0 auto}
   .pending.warn{background:#fff4e5;color:#a6531f;border:1px solid #f3d7b0}
   .run-pulse{animation:runp 1.4s ease-in-out infinite}
   @keyframes runp{0%,100%{box-shadow:0 0 0 0 rgba(31,111,224,.35)}50%{box-shadow:0 0 0 6px rgba(31,111,224,0)}}
@@ -322,9 +325,7 @@ window.__hideBoot=function(){
 <div class="wrap">
   <div class="hero">
     <h1 data-i18n="heroTitle">Conciliador de Contas</h1>
-    <p data-i18n="heroText">Carrega o teu Excel e a app encontra as linhas cujo <b>DEB_CRED</b> soma zero
-       (fatura + pagamento, notas de crédito, um pagamento de várias faturas) e marca as que ficam soltas.
-       Tudo corre no teu navegador — nenhum ficheiro sai do teu computador.</p>
+    <p data-i18n="heroText">Concilia qualquer conta — clientes, fornecedores, salários de trabalhadores, outras contas a receber e a pagar, impostos e dívidas ao Estado. Carrega <b>um ou vários Excel</b> e escolhe o que queres fazer: <b>conciliar</b>, encontrando as linhas que somam zero (fatura + pagamento, notas de crédito, um pagamento de várias faturas), ou apenas <b>juntar todas as folhas</b> num único ficheiro, com folha de índice e ordenação. Funciona com os valores numa coluna ou em duas (débito e crédito), e traz perfis prontos para sistemas de contabilidade — podes criar o teu. Tudo corre no teu navegador: nenhum ficheiro sai do teu computador.</p>
   </div>
 
   <div class="card">
@@ -352,6 +353,7 @@ window.__hideBoot=function(){
               <option value="" data-i18n="presetGen">Genérico</option>
               <option value="centralgest">CentralGest</option>
               <option value="bcpt">Business Central PT</option>
+              <option value="primavera">Primavera</option>
             </select>
             <button id="btn-sys" class="btn ghost" style="width:36px;padding:0;justify-content:center" title="Criar / gerir sistemas"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
           </div>
@@ -465,7 +467,7 @@ const I18N={
  pt:{
   btnInstr:ICON.book+" Instruções",
   heroTitle:"Conciliador de Contas",
-  heroText:"Concilia qualquer conta — clientes, fornecedores, salários de trabalhadores, outras contas a receber e a pagar, impostos e dívidas ao Estado. Carrega o teu Excel e a app encontra as linhas cujo <b>DEB_CRED</b> soma zero (fatura + pagamento, notas de crédito, um pagamento de várias faturas) e marca as que ficam soltas. Tudo corre no teu navegador — nenhum ficheiro sai do teu computador.",
+  heroText:"Concilia qualquer conta — clientes, fornecedores, salários de trabalhadores, outras contas a receber e a pagar, impostos e dívidas ao Estado. Carrega <b>um ou vários Excel</b> e escolhe o que queres fazer: <b>conciliar</b>, encontrando as linhas que somam zero (fatura + pagamento, notas de crédito, um pagamento de várias faturas), ou apenas <b>juntar todas as folhas</b> num único ficheiro, com folha de índice e ordenação. Funciona com os valores numa coluna ou em duas (débito e crédito), e traz perfis prontos para sistemas de contabilidade — podes criar o teu. Tudo corre no teu navegador: nenhum ficheiro sai do teu computador.",
   dropMain:"Arrasta ou <b>carrega o teu ficheiro</b> (Excel ou CSV)",
   dropSub:"Aceita .xlsx · .xlsm · .xlsb · .xls · .csv · .ods &nbsp;|&nbsp; escolhe a <b>Ação</b> e carrega em <b>Executar</b> — vê as <b>Instruções</b>.",
   lblTol:"Tolerância", lblMax:"Linhas por grupo",
@@ -514,9 +516,10 @@ const I18N={
 <ul>
 <li><b>CentralGest</b> — concilia sempre a <b>duas colunas</b>: <code>Débito</code>, <code>Crédito</code> e data em <code>Data Doc. Externo</code>.</li>
 <li><b>Business Central PT</b> — concilia sempre a <b>uma coluna</b>: <code>Valor</code> e data em <code>Data Registo</code>.</li>
+<li><b>Primavera</b> — concilia sempre a <b>duas colunas</b>: <code>Débito</code>, <code>Crédito</code> e data em <code>Data</code>.</li>
 <li><b>Genérico</b> — deteção automática; és tu que escolhes em <b>Valores</b>.</li>
 </ul>
-<p><b>Criar o teu próprio sistema:</b> carrega no botão <b>+</b> ao lado do seletor <b>Sistema</b>. Dás-lhe um nome, escolhes se a análise é a <b>1 coluna</b> ou a <b>2 colunas</b>, e escreves como se chamam as colunas no teu Excel (a da data, e a dos valores ou as de débito e crédito). Fica guardado no navegador e aparece na lista sempre que abrires a app. Podes apagá-lo no mesmo painel.</p>
+<p><b>Criar o teu próprio sistema:</b> carrega no botão <b>+</b> ao lado do seletor <b>Sistema</b>. Dás-lhe um nome, escolhes se a análise é a <b>1 coluna</b> ou a <b>2 colunas</b>, e escreves como se chamam as colunas no teu Excel (a da data, e a dos valores ou as de débito e crédito). Fica guardado no navegador e aparece na lista sempre que abrires a app. Nesse mesmo painel vês todos os sistemas e podes <b>eliminar</b> os que criaste (com o botão Eliminar, que pede confirmação).</p>
 
 <div class="mh">5 · As colunas (modo Genérico)</div>
 <div class="callout a">📅 A coluna das <b>datas</b> deve chamar-se <code>DATA_CERTA</code>. A ordem das colunas é indiferente — a app procura-as pelo nome.</div>
@@ -589,6 +592,8 @@ const I18N={
   sysMode:"Análise", sysOne:"1 coluna (positivos e negativos)", sysTwo:"2 colunas (débito e crédito)",
   sysDate:"Coluna da data", sysVal:"Coluna dos valores", sysDeb:"Coluna do débito", sysCre:"Coluna do crédito",
   sysSave:"Guardar sistema", sysEmpty:"Ainda não criaste nenhum sistema.", sysMiss:"Faltam campos:",
+  sysBuiltinT:"Sistemas já incluídos", sysMineT:"Os teus sistemas", sysBuiltin:"incluído",
+  sysDelete:"Eliminar", sysConfirm:"Confirmar?",
   sysNote:"Guarda-se no teu navegador apenas os nomes das colunas que escreves aqui — nunca dados dos teus ficheiros.",
   btnRun:"Executar", runTitle:"Executar", runAsk:"Já configuraste tudo? Vais executar com estas opções:",
   runGo:"Sim, executar", runCancel:"Cancelar", runFiles:"Ficheiros", runSheets:"Folhas",
@@ -603,7 +608,7 @@ const I18N={
  en:{
   btnInstr:ICON.book+" Instructions",
   heroTitle:"Account Reconciler",
-  heroText:"Reconcile any account — customers, suppliers, employee salaries, other receivables and payables, taxes and government debts. Upload your Excel and the app finds the lines whose <b>DEB_CRED</b> sums to zero (invoice + payment, credit notes, one payment settling several invoices) and flags the unmatched ones. Everything runs in your browser — no file ever leaves your computer.",
+  heroText:"Reconcile any account — customers, suppliers, employee salaries, other receivables and payables, taxes and government debts. Load <b>one or several Excel files</b> and choose what to do: <b>reconcile</b>, finding the lines that sum to zero (invoice + payment, credit notes, one payment settling several invoices), or simply <b>merge every sheet</b> into a single file, with an index sheet and sorting. It works with the amounts in one column or in two (debit and credit), and comes with ready-made profiles for accounting systems — you can create your own. Everything runs in your browser: no file ever leaves your computer.",
   dropMain:"Drag or <b>upload your file</b> (Excel or CSV)",
   dropSub:"Accepts .xlsx · .xlsm · .xlsb · .xls · .csv · .ods &nbsp;|&nbsp; pick the <b>Action</b> and press <b>Run</b> — see <b>Instructions</b>.",
   lblTol:"Tolerance", lblMax:"Lines per group",
@@ -652,9 +657,10 @@ const I18N={
 <ul>
 <li><b>CentralGest</b> — always <b>two columns</b>: <code>Débito</code>, <code>Crédito</code>, date in <code>Data Doc. Externo</code>.</li>
 <li><b>Business Central PT</b> — always <b>one column</b>: <code>Valor</code>, date in <code>Data Registo</code>.</li>
+<li><b>Primavera</b> — always <b>two columns</b>: <code>Débito</code>, <code>Crédito</code>, date in <code>Data</code>.</li>
 <li><b>Generic</b> — automatic detection; you choose in <b>Amounts</b>.</li>
 </ul>
-<p><b>Create your own system:</b> click the <b>+</b> button next to the <b>System</b> selector. Give it a name, choose whether the analysis uses <b>1 column</b> or <b>2 columns</b>, and type how the columns are named in your Excel (the date one, and the amounts one or the debit/credit ones). It is stored in your browser and shows up in the list every time you open the app. You can delete it from the same panel.</p>
+<p><b>Create your own system:</b> click the <b>+</b> button next to the <b>System</b> selector. Give it a name, choose whether the analysis uses <b>1 column</b> or <b>2 columns</b>, and type how the columns are named in your Excel (the date one, and the amounts one or the debit/credit ones). It is stored in your browser and shows up in the list every time you open the app. That same panel lists every system and lets you <b>delete</b> the ones you created (with the Delete button, which asks for confirmation).</p>
 
 <div class="mh">5 · The columns (Generic mode)</div>
 <div class="callout a">📅 The <b>date</b> column must be named <code>DATA_CERTA</code>. Column order does not matter — the app finds them by name.</div>
@@ -727,6 +733,8 @@ const I18N={
   sysMode:"Analysis", sysOne:"1 column (positive and negative)", sysTwo:"2 columns (debit and credit)",
   sysDate:"Date column", sysVal:"Amounts column", sysDeb:"Debit column", sysCre:"Credit column",
   sysSave:"Save system", sysEmpty:"You have not created any system yet.", sysMiss:"Missing fields:",
+  sysBuiltinT:"Built-in systems", sysMineT:"Your systems", sysBuiltin:"built-in",
+  sysDelete:"Delete", sysConfirm:"Confirm?",
   sysNote:"Only the column names you type here are stored in your browser — never any data from your files.",
   btnRun:"Run", runTitle:"Run", runAsk:"Is everything set up? You are about to run with these options:",
   runGo:"Yes, run", runCancel:"Cancel", runFiles:"Files", runSheets:"Sheets",
@@ -741,7 +749,7 @@ const I18N={
  es:{
   btnInstr:ICON.book+" Instrucciones",
   heroTitle:"Conciliador de Cuentas",
-  heroText:"Concilia cualquier cuenta — clientes, proveedores, salarios de trabajadores, otras cuentas por cobrar y por pagar, impuestos y deudas con el Estado. Sube tu Excel y la app encuentra las líneas cuyo <b>DEB_CRED</b> suma cero (factura + pago, notas de crédito, un pago que salda varias facturas) y marca las que quedan sueltas. Todo corre en tu navegador — ningún fichero sale de tu ordenador.",
+  heroText:"Concilia cualquier cuenta — clientes, proveedores, salarios de trabajadores, otras cuentas por cobrar y por pagar, impuestos y deudas con el Estado. Carga <b>uno o varios Excel</b> y elige qué hacer: <b>conciliar</b>, encontrando las líneas que suman cero (factura + pago, notas de crédito, un pago que salda varias facturas), o simplemente <b>juntar todas las hojas</b> en un único fichero, con hoja de índice y ordenación. Funciona con los valores en una columna o en dos (débito y crédito), y trae perfiles listos para sistemas de contabilidad — puedes crear el tuyo. Todo corre en tu navegador: ningún fichero sale de tu ordenador.",
   dropMain:"Arrastra o <b>sube tu fichero</b> (Excel o CSV)",
   dropSub:"Acepta .xlsx · .xlsm · .xlsb · .xls · .csv · .ods &nbsp;|&nbsp; elige la <b>Acción</b> y pulsa <b>Ejecutar</b> — ver <b>Instrucciones</b>.",
   lblTol:"Tolerancia", lblMax:"Líneas por grupo",
@@ -790,9 +798,10 @@ const I18N={
 <ul>
 <li><b>CentralGest</b> — concilia siempre a <b>dos columnas</b>: <code>Débito</code>, <code>Crédito</code> y fecha en <code>Data Doc. Externo</code>.</li>
 <li><b>Business Central PT</b> — concilia siempre a <b>una columna</b>: <code>Valor</code> y fecha en <code>Data Registo</code>.</li>
+<li><b>Primavera</b> — concilia siempre a <b>dos columnas</b>: <code>Débito</code>, <code>Crédito</code> y fecha en <code>Data</code>.</li>
 <li><b>Genérico</b> — detección automática; tú eliges en <b>Valores</b>.</li>
 </ul>
-<p><b>Crear tu propio sistema:</b> pulsa el botón <b>+</b> junto al selector <b>Sistema</b>. Le pones un nombre, eliges si el análisis es a <b>1 columna</b> o a <b>2 columnas</b>, y escribes cómo se llaman las columnas en tu Excel (la de la fecha, y la de los valores o las de débito y crédito). Se guarda en el navegador y aparece en la lista cada vez que abras la app. Puedes borrarlo desde el mismo panel.</p>
+<p><b>Crear tu propio sistema:</b> pulsa el botón <b>+</b> junto al selector <b>Sistema</b>. Le pones un nombre, eliges si el análisis es a <b>1 columna</b> o a <b>2 columnas</b>, y escribes cómo se llaman las columnas en tu Excel (la de la fecha, y la de los valores o las de débito y crédito). Se guarda en el navegador y aparece en la lista cada vez que abras la app. En ese mismo panel ves todos los sistemas y puedes <b>eliminar</b> los que creaste (con el botón Eliminar, que pide confirmación).</p>
 
 <div class="mh">5 · Las columnas (modo Genérico)</div>
 <div class="callout a">📅 La columna de <b>fechas</b> debe llamarse <code>DATA_CERTA</code>. El orden de las columnas da igual — la app las busca por el nombre.</div>
@@ -865,6 +874,8 @@ const I18N={
   sysMode:"Análisis", sysOne:"1 columna (positivos y negativos)", sysTwo:"2 columnas (débito y crédito)",
   sysDate:"Columna de la fecha", sysVal:"Columna de los valores", sysDeb:"Columna del débito", sysCre:"Columna del crédito",
   sysSave:"Guardar sistema", sysEmpty:"Todavía no has creado ningún sistema.", sysMiss:"Faltan campos:",
+  sysBuiltinT:"Sistemas ya incluidos", sysMineT:"Tus sistemas", sysBuiltin:"incluido",
+  sysDelete:"Eliminar", sysConfirm:"¿Confirmar?",
   sysNote:"En tu navegador solo se guardan los nombres de columna que escribes aquí — nunca datos de tus ficheros.",
   btnRun:"Ejecutar", runTitle:"Ejecutar", runAsk:"¿Ya lo configuraste todo? Vas a ejecutar con estas opciones:",
   runGo:"Sí, ejecutar", runCancel:"Cancelar", runFiles:"Ficheros", runSheets:"Hojas",
@@ -1118,7 +1129,10 @@ const PRESETS={
     rot:{deb:"Débito", cre:"Crédito", fecha:"Data Doc. Externo"}},
   bcpt:{nome:"Business Central PT", mode:"one",
     valor:["VALOR"], fecha:["DATAREGISTO"],
-    rot:{valor:"Valor", fecha:"Data Registo"}}
+    rot:{valor:"Valor", fecha:"Data Registo"}},
+  primavera:{nome:"Primavera", mode:"two",
+    deb:["DEBITO"], cre:["CREDITO"], fecha:["DATA"],
+    rot:{deb:"Débito", cre:"Crédito", fecha:"Data"}}
 };
 // ---- sistemas criados pelo utilizador (guardados no navegador) ----
 const SYS_KEY="conciliador_sistemas_v1";
@@ -1764,19 +1778,47 @@ function pintarSelectSistemas(sel){
   if(window.__reenhance) window.__reenhance("preset");
   if(window.__applyPreset) window.__applyPreset();
 }
+const ICO_LIXO='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>';
 function pintarListaSistemas(){
   const box=document.getElementById("sys-list");
-  const ids=Object.keys(CUSTOM);
-  if(!ids.length){ box.innerHTML=`<div class="muted" style="font-size:12.5px">${t("sysEmpty")}</div>`; return; }
-  box.innerHTML=ids.map(id=>{
-    const c=CUSTOM[id];
-    const cols=c.mode==="two"?`${c.deb} / ${c.cre}`:c.valor;
-    return `<div class="syrow"><b>${c.nome}</b><span class="muted">${cols} · ${c.fecha}</span>
-      <span class="del" data-del="${id}" title="remover">×</span></div>`;
+  let s="";
+  // predefinidos (não se podem apagar)
+  s+=`<div class="mh2" style="margin-bottom:8px">${t("sysBuiltinT")}</div>`;
+  s+=Object.keys(PRESETS).map(id=>{
+    const P=PRESETS[id], r=P.rot||{};
+    const cols=P.mode==="two"?`${r.deb} / ${r.cre}`:r.valor;
+    return `<div class="syrow"><div style="min-width:0"><b>${P.nome}</b>
+      <div class="muted" style="font-size:11.5px">${cols} · ${r.fecha}</div></div>
+      <span class="tagfix">${t("sysBuiltin")}</span></div>`;
   }).join("");
-  box.querySelectorAll(".del").forEach(x=>x.addEventListener("click",()=>{
-    delete CUSTOM[x.dataset.del]; saveCustom(); pintarListaSistemas();
-    pintarSelectSistemas(document.getElementById("preset").value in CUSTOM?undefined:"");
+  // criados por ti
+  const ids=Object.keys(CUSTOM);
+  s+=`<div class="mh2" style="margin:16px 0 8px">${t("sysMineT")}</div>`;
+  s+= ids.length ? ids.map(id=>{
+        const c=CUSTOM[id];
+        const cols=c.mode==="two"?`${c.deb} / ${c.cre}`:c.valor;
+        return `<div class="syrow"><div style="min-width:0"><b>${c.nome}</b>
+          <div class="muted" style="font-size:11.5px">${cols} · ${c.fecha}</div></div>
+          <button class="btn ghost del" data-del="${id}">${ICO_LIXO} <span>${t("sysDelete")}</span></button></div>`;
+      }).join("")
+    : `<div class="muted" style="font-size:12.5px">${t("sysEmpty")}</div>`;
+  box.innerHTML=s;
+  // apagar com confirmação em dois toques
+  box.querySelectorAll(".del").forEach(btn=>btn.addEventListener("click",()=>{
+    if(btn.dataset.conf!=="1"){
+      btn.dataset.conf="1";
+      btn.classList.add("danger");
+      btn.querySelector("span").textContent=t("sysConfirm");
+      setTimeout(()=>{ if(btn.dataset.conf==="1"){ btn.dataset.conf=""; btn.classList.remove("danger");
+        const sp=btn.querySelector("span"); if(sp) sp.textContent=t("sysDelete"); } },4000);
+      return;
+    }
+    const id=btn.dataset.del;
+    const eraAtual=document.getElementById("preset").value===id;
+    delete CUSTOM[id]; saveCustom();
+    pintarListaSistemas();
+    pintarSelectSistemas(eraAtual?"":undefined);
+    if(FILES.length) marcarPendente();
   }));
 }
 // ---- balões de ajuda (funcionam com rato e com o dedo) ----

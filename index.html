@@ -89,7 +89,7 @@ window.__hideBoot=function(){
   .wrap{padding:22px 24px 40px;max-width:1120px;margin:0 auto}
   .hero{margin:6px 0 18px}
   .hero h1{margin:0;font-size:22px;font-weight:800;letter-spacing:-.3px}
-  .hero p{margin:7px 0 0;font-size:13.5px;color:var(--muted)}
+  .hero p{margin:7px 0 0;font-size:13.5px;color:var(--muted);text-align:justify;text-justify:inter-word}
   .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;
     box-shadow:0 2px 8px rgba(20,40,90,.05)}
   .drop{border:2px dashed #c4d0e8;border-radius:14px;padding:30px;text-align:center;cursor:pointer;
@@ -439,8 +439,7 @@ window.__hideBoot=function(){
       <div id="view-groups" class="hidden"></div>
       <div id="sheetbar" class="sheetbar hidden"></div>
     </div>
-    <div class="note" data-i18n="noteBool">A coluna <b>CONCILIADO</b> sai como VERDADEIRO/FALSO. No Excel podes selecioná-la e usar
-      <b>Inserir → Caixa de verificação</b> para a tornar clicável.</div>
+    <div class="note" data-i18n="noteBool">A coluna <b>CONCILIADO</b> e a <b>INFORMAÇÃO</b> saem no idioma que tens escolhido aqui na app (VERDADEIRO/FALSO e <i>Referência</i>).</div>
   </div>
 </div>
 
@@ -475,7 +474,7 @@ const I18N={
   mTotal:"Linhas totais", mOk:"Conciliadas <span class='dot g'></span>", mNo:"Soltas <span class='dot o'></span>", mSaldo:"Saldo em aberto",
   tabAll:ICON.list+" Tudo", tabLoose:ICON.xc+" Soltas (saldo)", tabGroups:ICON.link+" Grupos",
   noteLoose:"Estas são as linhas que não casam com nada e compõem o saldo atual da conta.",
-  noteBool:"A coluna <b>CONCILIADO</b> sai como VERDADEIRO/FALSO. No Excel podes selecioná-la e usar <b>Inserir → Caixa de verificação</b> para a tornar clicável.",
+  noteBool:"A coluna <b>CONCILIADO</b> e a <b>INFORMAÇÃO</b> saem no idioma que tens escolhido aqui na app (VERDADEIRO/FALSO e <i>Referência</i>).",
   modalTitle:ICON.book+" Instruções",
   step1:"<b>Carrega ou arrasta</b> o teu ficheiro para a área indicada. Formatos aceites: <b>.xlsx</b>, <b>.xlsm</b>, <b>.xlsb</b>, <b>.xls</b> (97-2003), <b>.csv</b> e <b>.ods</b>.",
   step2:"Se o teu ficheiro vem de um sistema de contabilidade, escolhe-o no seletor <b>Sistema</b> (<b>CentralGest</b> ou <b>Business Central PT</b>) e a app assume sozinha os nomes das colunas. Em <b>Genérico</b>, o teu Excel tem de cumprir <b>dois requisitos</b>:",
@@ -616,7 +615,7 @@ const I18N={
   mTotal:"Total lines", mOk:"Reconciled <span class='dot g'></span>", mNo:"Unmatched <span class='dot o'></span>", mSaldo:"Open balance",
   tabAll:ICON.list+" All", tabLoose:ICON.xc+" Unmatched (balance)", tabGroups:ICON.link+" Groups",
   noteLoose:"These are the lines that match nothing and make up the current account balance.",
-  noteBool:"The <b>CONCILIADO</b> column comes as TRUE/FALSE. In Excel you can select it and use <b>Insert → Checkbox</b> to make it clickable.",
+  noteBool:"The <b>RECONCILED</b> and <b>INFORMATION</b> columns come out in the language you have selected here in the app (TRUE/FALSE and <i>Reference</i>).",
   modalTitle:ICON.book+" Instructions",
   step1:"<b>Upload or drag</b> your file to the indicated area. Accepted formats: <b>.xlsx</b>, <b>.xlsm</b>, <b>.xlsb</b>, <b>.xls</b> (97-2003), <b>.csv</b> and <b>.ods</b>.",
   step2:"If your file comes from an accounting system, pick it in the <b>System</b> selector (<b>CentralGest</b> or <b>Business Central PT</b>) and the app assumes the column names for you. In <b>Generic</b> mode, your Excel must meet <b>two column requirements</b>:",
@@ -757,7 +756,7 @@ const I18N={
   mTotal:"Líneas totales", mOk:"Conciliadas <span class='dot g'></span>", mNo:"Sueltas <span class='dot o'></span>", mSaldo:"Saldo abierto",
   tabAll:ICON.list+" Todo", tabLoose:ICON.xc+" Sueltas (saldo)", tabGroups:ICON.link+" Grupos",
   noteLoose:"Estas son las líneas que no casan con nada y componen el saldo actual de la cuenta.",
-  noteBool:"La columna <b>CONCILIADO</b> sale como VERDADERO/FALSO. En Excel puedes seleccionarla y usar <b>Insertar → Casilla de verificación</b> para hacerla clicable.",
+  noteBool:"Las columnas <b>CONCILIADO</b> e <b>INFORMACIÓN</b> salen en el idioma que tengas elegido aquí en la app (VERDADERO/FALSO y <i>Referencia</i>).",
   modalTitle:ICON.book+" Instrucciones",
   step1:"<b>Sube o arrastra</b> tu fichero al área indicada. Formatos aceptados: <b>.xlsx</b>, <b>.xlsm</b>, <b>.xlsb</b>, <b>.xls</b> (97-2003), <b>.csv</b> y <b>.ods</b>.",
   step2:"Si tu fichero viene de un sistema de contabilidad, elígelo en el selector <b>Sistema</b> (<b>CentralGest</b> o <b>Business Central PT</b>) y la app asume sola los nombres de las columnas. En <b>Genérico</b>, tu Excel debe cumplir <b>dos requisitos</b>:",
